@@ -1,0 +1,367 @@
+
+
+\section{Overview}
+
+In the paper, we have discussed different variants of the Impact algorithm.
+
+Algorithm~\ref{algo:impact}, the direct extension of Impact to concurrent programs,
+uses a covering relation where two nodes need to have the same
+control location and implied labels:
+\begin{align}
+	\locvec(v) = \locvec(w) \wedge
+	\annotation(v) \Rightarrow \annotation(w)
+\end{align}
+%
+In the block-encoding variant, we restrict the
+covering relation to the boundaries of basic blocks,
+i.e., other nodes are not compared:
+%
+\begin{align}
+	\locvec(v), \locvec(w) \in bloc \wedge
+	\locvec(v) = \locvec(w) \wedge
+	\annotation(v) \Rightarrow \annotation(w)
+\end{align}
+In the the thread-local variant, Algorithm~\ref{algo:impact:local}, 
+we only compare the control location of the $k$-th thread:
+\begin{align}
+	\locvec_k(v) = \locvec_k (w) \wedge
+	\annotation(v) \Rightarrow \annotation(w)
+\end{align}
+
+
+
+\begin{figure}
+\centering
+\begin{tabular}{|ccccc|}
+\hline
+\subfloat[][sequential cover]{ 
+\begin{tikzpicture}
+	\node[draw] (u1) at (0,1) {$l_0$};
+	\node[draw=none,right of=u1,node distance=0.75cm] (u4)  {$\annotation$};
+	\node at (-1.5,1) {} ;
+
+	\node[draw] (v1) at (0,0) {$l_0$};
+	\node[draw=none,right of=v1,node distance=0.75cm] (v4)  {$\annotation'$};
+
+	\node[below of=v1] (expandv1) {};
+
+	\draw[draw=none] (u1) to node[rotate=90] {$=$} (v1);
+	\draw[draw=none] (u4) to node[rotate=90] {$\Rightarrow$} (v4);
+
+	\draw[trans,dashed] (v1) to node {} (expandv1);
+
+\end{tikzpicture}
+}
+&
+$\qquad$
+&
+\subfloat[][global cover]{ 
+\begin{tikzpicture}
+	\node[draw] (u1) at (0,1) {$l_0$};
+	\node[draw,right of=u1,node distance=0.5cm] (u2)  {$l_1$};
+	\node[draw,right of=u2,node distance=0.5cm] (u3)  {$l_2$};
+	\node[draw=none,right of=u3,node distance=0.75cm] (u4)  {$\annotation$};
+
+	\node[draw] (v1) at (0,0) {$l_0$};
+	\node[draw,right of=v1,node distance=0.5cm] (v2)  {$l_1$};
+	\node[draw,right of=v2,node distance=0.5cm] (v3)  {$l_2$};
+	\node[draw=none,right of=v3,node distance=0.75cm] (v4)  {$\annotation'$};
+
+	\node[below of=v1] (expandv1) {};
+	\node[below of=v2] (expandv2) {};
+	\node[below of=v3] (expandv3) {};
+
+	\draw[draw=none] (u1) to node[rotate=90] {$=$} (v1);
+	\draw[draw=none] (u2) to node[rotate=90] {$=$} (v2);
+	\draw[draw=none] (u3) to node[rotate=90] {$=$} (v3);
+	\draw[draw=none] (u4) to node[rotate=90] {$\Rightarrow$} (v4);
+
+	\draw[trans,dashed] (v1) to node {} (expandv1);
+	\draw[trans,dashed] (v2) to node {} (expandv2);
+	\draw[trans,dashed] (v3) to node {} (expandv3);
+
+\end{tikzpicture}
+}
+& $\qquad$ & 
+\subfloat[][local cover]{ 
+\begin{tikzpicture}
+	\node[draw] (u1) at (0,1) {$l_0$};
+	\node[draw,right of=u1,node distance=0.5cm] (u2)  {$l_1$};
+	\node[draw,right of=u2,node distance=0.5cm] (u3)  {$l_2$};
+	\node[draw=none,right of=u3,node distance=0.75cm] (u4)  {$\annotation$};
+
+	\node[draw] (v1) at (0,0) {$l_0$};
+	\node[draw,right of=v1,node distance=0.5cm] (v2)  {$l_1$};
+	\node[draw,right of=v2,node distance=0.5cm] (v3)  {$l_3$};
+	\node[draw=none,right of=v3,node distance=0.75cm] (v4)  {$\annotation'$};
+
+	\node[below of=v1] (expandv1) {};
+	\node[below of=v2] (expandv2) {};
+	\node[below of=v3] (expandv3) {};
+
+	\draw[draw=none] (u1) to node[rotate=90] {$=$} (v1);
+	\draw[draw=none] (u2) to node[rotate=90] {$=$} (v2);
+	\draw[draw=none] (u3) to node[rotate=90] {$\sqsupset$} (v3);
+	\draw[draw=none] (u4) to node[rotate=90] {$\Rightarrow$} (v4);
+
+	\draw[trans,dashed] (v1) to node {} (expandv1);
+	\draw[trans,dashed] (v2) to node {} (expandv2);
+	\draw[trans] (v3) to node {} (expandv3);
+
+\end{tikzpicture}
+}
+\\
+\hline
+\end{tabular}
+\caption{
+Different variants of covering relations.
+A dashed arrow indicates an enabled
+action that is not executed due to a cover.
+A solid arrow indicates an action
+that is executed.
+}
+\end{figure}
+
+\section{Thread-local Abstraction}
+\label{sec:local}
+
+Algorithm~\ref{algo:impact} keeps track of the control locations of all threads explicitly.
+Due to thread interleaving, there can be an explosion in the number of control locations.
+
+In this section, we propose a thread-local algorithm that decomposes safety verification of a program
+into $n$ problems, where $n$ is the number of threads, following the Owicki-Gries proof rule.
+Thereby, it focuses on one thread at a time -- let us call it the pivot thread 
+-- trying to prove that the pivot thread cannot reach an error.
+We only represent the control location of the pivot thread explicitly.
+All information, including control location, of the other threads is then represented
+'symbolically' in the label.
+The algorithm constructs thread-local invariants, which we introduce next,
+by building $n$ ARTs, one for each thread.
+
+\paragraph{Thread-local Invariants \`a la Owicki-Gries.}
+The goal of the thread-local algorithm is to contruct thread-local safety invariants
+in the style of the Owicki-Gries proof rule.
+The distinctive difference of thread-local invariants to (global) safety invariants
+is that thread-local invariants label thread locations rather than global locations with formulas.
+We formalise thread-local invariants in the following definition:
+%
+\begin{definition}
+Let $\program$ be a program with threads $\{\thread_1,\ldots,\thread_n\}$.
+An  inductive thread-local invariant for $\program$ is a family of
+mappings $(I_i)_{i\in\{1,\ldots,n\}}: \locs_i \to \wff(V)$ such that
+for all threads $T_k = (\locs_k,\locinit_k,\locfinal_k,\actions_k)$:
+\begin{itemize}
+  \item $init \Rightarrow I_k(\locinit_k)$
+  \item for all location $l \in \locs_i$ and all actions $a=(l,R,l')\in \actions_k$, we have 
+           \begin{align}
+             I_k(l)\wedge R \Rightarrow I_k(l')
+             \label{owicki-gries:inductive}
+           \end{align}
+  \item for all location $l \in \locs_i$ and all actions $a=(l',R,l'')\in \actions(\thread_j)$ with $j\neq k$, we have 
+           \begin{align}
+             I_k(l)\wedge R \Rightarrow I_k(l)
+             \label{owicki-gries:closed}
+           \end{align}
+\end{itemize}
+
+An inductive thread-local invariant is a safety invariant if $I(\locfinal_k)\equiv False$ for all error locations $\locfinal_k$
+where $k\in\{1,\ldots,n\}$.
+\end{definition}
+
+Condition~\ref{owicki-gries:inductive} states that a
+thread-local invariant for thread $k$ is inductive with respect to the transitions of thread $k$.
+Condition~\ref{owicki-gries:closed} says that
+a thread-local invariant for thread $k$ is closed under actions of other threads.
+
+The correctness of thread-local abstraction hinges on the following observation:
+%
+\begin{theorem}
+If there is a thread-local safety invariant, the program is safe.
+\end{theorem}
+
+\paragraph{Thread-local ARTs.}
+
+The difference between a reachability and
+a thread-local reachability tree is the 
+local covering relation, as motivated in the Introduction.
+
+Tree nodes are again tuples $(\locvec,\annotation)$ consisting of
+a global location $\locvec$ and a state formula $\annotation$.
+For a pair of such nodes $u$ and $v$, let us denote by $E_{u,v}$ the
+set of thread indices where the threads
+are at the same location in $u$ and $v$,
+formally, we have
+\begin{align*}
+E_{u,v}=\{ i\in\{1,\ldots,n\} \mid \locvec_i (u) = \locvec_i(v)\} \ .
+\end{align*}
+
+Suppose that we consider an abstraction with respect
+to thread $k\in\{1,\ldots,n\}$.
+Then we define the following a local covering relation
+such that $u\covers_k v$ if
+\begin{itemize}
+  \item the locations assigned to thread $k$ must agree in $u$ and $v$, i.e., $k\in E_{u,v}$.
+  \item for all threads $j$, whose assigned locations do not agree, 
+  the location $\locvec(v)$ is able to reach $\locvec(u)$, i.e., $\locvec_j(v) \sqsubset \locvec_j(u)$,
+  \item the implication $\annotation(u) \Rightarrow \annotation(v)$ holds.
+\end{itemize}
+More formally, we define:
+\begin{align*}
+u\covers_k v  \qquad \Longleftrightarrow \qquad&
+k\in E_{u,v} \wedge \\
+& (\forall j\notin E_{u,v}:\ \locvec_j(v) \sqsubset \locvec_j(u)) \wedge \\
+& \annotation(u) \Rightarrow \annotation(v) \ .
+\end{align*}
+
+%
+\begin{definition}[Thread-local abstract reachability tree]
+           A thread-local ART for program $\program$ 
+           and thread $\thread_k = (\locs_k,\locinit_k,\locfinal_k,\actions_k)$
+           is a tuple $(V,\epsilon,\transby{},\covers)$ 
+           consisting of nodes $V$, root node $\epsilon \in V$, edges $\transby{}$,
+           and a covering relation $\covers \subseteq V^2$ between tree nodes such that:
+           \begin{itemize}
+           \item a node is a tuple $(l,\annotation)$
+           where $l\in \locs_k$ is a control location, and $\annotation$ a state formula;
+           for convenience, we write $l(v)$ to denote node $v$'s control location
+           and $\annotation(v)$ to denote node $v$'s annotation
+           $\annotation$.
+            \item a node $v=(l,\annotation)$ is either a leaf or has            
+           an out-going edge for every action that is enabled at $\locvec$.
+           We write $v\transby{a} w$ if an edge
+           between $v$ and $w$ is induced by action $a$.
+           \end{itemize}
+\end{definition}
+
+\begin{theorem}
+If there are safe, complete, well-labeled thread-local ARTs 
+for each thread of a program $\program$, the program is safe.
+\end{theorem}
+\begin{proof} 
+Let $A_1,\ldots,A_n$ be the thread-local ARTs.
+The labeling of the $A_i$ gives a safety invariant $M_i$
+where
+\begin{align*}
+I_i(l) = \bigvee \{ \annotation(v) \mid l(v) = l\}. \quad 
+\end{align*}
+
+Let $u$ be a node.
+If $u$ is not covered, the inductive labeling
+gives inductiveness for actions of thread $k$ and
+closedness for actions of other threads.
+
+So let us assume, without loss of generality,
+that node $u$ is (partially) covered.
+Then there exists an ancestor $v$ of $u$
+in the tree and another node $w$ such that $v\covers_k w$.
+
+
+\qed
+\end{proof}
+
+
+\paragraph{The Algorithm.}
+The thread-local abstraction algorithm is similar
+in structure to Algorithm~\ref{algo:impact}.
+It uses procedures \prog{expand}, \prog{close},
+and \prog{refine}.
+
+\prog{expand} takes the pivot thread as an additional argument. 
+The actions of the pivot thread determine the location of the 
+location of the pivot thread in the successor nodes, 
+while actions of other threads have no such effect.
+Otherwise the procedure is unchanged.
+\prog{close} is based on a covering relation 
+which compares only the control location
+of the pivot thread, rather than the same global control location.
+Logical implication of the labels still determines the covering relation.
+
+\prog{main} construct a thread-local ART for each thread,
+i.e., it runs $n$ copies of the original Impact algorithm.
+
+
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+
+
+\Procedure {expand}{$k,v$}
+    \State $(l,\annotation) := v$
+    \For { $ j = 0 \ldots n$}
+    	\For { $(l,R,l') \in \actions(\thread_k)$}
+		\State $w:=$ fresh node 
+    		\State $l(w):=l'$
+      		\State $\annotation(w) := True$
+      		\State $Q := Q \cup \{w\}$
+      		\State $V := V \cup \{w\}$
+	         \State $\transby {} := \transby {} \cup \{ (v,R,w) \}$   \label{algo:impact:expand:trans}	
+     	\EndFor
+    	\For { $(l',R,l'') \in \actions(\thread_j)$ with $j\neq k$}
+		\State $w:=$ fresh node 
+    		\State $l(w):=l$
+      		\State $\annotation(w) := True$
+      		\State $Q := Q \cup \{w\}$
+      		\State $V := V \cup \{w\}$
+	         \State $\transby {} := \transby {} \cup \{ (v,R,w) \}$  		
+     	\EndFor
+
+
+     \EndFor
+     
+\EndProcedure 
+\\
+
+\Procedure {refine}{$v$}
+
+	\State $\ldots$
+
+\EndProcedure 
+\\
+
+\Procedure {close}{$v,k$}
+  \For {$w \in V^{\prec v}:$ $w$ uncovered, $l(v)=l(w)$ and $\annotation(v) \Rightarrow \annotation(w)$}
+		\State $\covers := (\covers \cup \{ (v,w) \}) \setminus \{(x,y)\in \covers \mid v \transby{}^* y \}$
+	\EndFor
+\EndProcedure 
+\\
+
+\Procedure {main}{$ k$}
+
+    \For { $ k = 1 \ldots n$}
+	\State $Q := \{ \epsilon \}$
+
+	\State $\covers := \emptyset$
+
+	\While { $Q \neq \emptyset$}
+
+	\State $v := top(Q)$
+
+	\State $\prog{Close}(v,k)$
+
+
+	\If {$v$ not covered}
+		\If { $final(v)$ }
+	 		\State $\prog{Refine}(v)$
+		\EndIf
+
+		\State $\prog{Expand}(v,k)$
+	\EndIf
+
+	\State $Q := Q \setminus \{v\}$
+
+	\EndWhile
+
+
+    \EndFor
+
+
+
+\EndProcedure 
+
+\end{algorithmic}
+\caption{
+Impact thread-local
+\label{algo:impact:local}
+}
+\end{algorithm}
+

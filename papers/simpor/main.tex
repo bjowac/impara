@@ -1,0 +1,294 @@
+\documentclass[envcountsame]{llncs}%
+
+%---------------------
+%---------------------
+%---------------------
+%\pagestyle{plain}
+
+\title{Partial-Order Subsumption}
+
+\usepackage{comment}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{listings}
+
+
+\newcommand{\apost}{\mathit{apost}}
+\newcommand{\labeling}{\rho}
+\author{Bj\"orn Wachter}
+\institute{Department of Computer Science, Oxford}
+
+% switch between long and short version
+\def\version{short}
+
+\def\longversion{long}
+\def\shortversion{short}
+
+\sloppy
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  Partial-order reduction is a systematic technique
+  to tackle the interleavings explosion in verification
+  of concurrent systems.
+  %
+  Partial-order reduction admits a concise automata-theoretic
+  characterisation, such that a concurrent system
+  can be verified by forming the cross product
+  of the original system with a partial-order automaton,
+  that filters out redundant execution traces.
+  %
+  However, so far, this approach has only been explored
+  without a notion of convergence, which is required
+  to compute loop invariants.
+  %
+  Subsumption provides an effective means to detect
+  convergence. 
+  %
+  In this paper, we present the missing piece, a subsumption
+  order for partial-order automata, and use it to
+  compute loop invariants for concurrent systems.
+\end{abstract}
+
+
+\section{Background}
+
+\subsection{Automata}
+
+\begin{definition}[Automaton]
+  $(Q,\Sigma,\delta,q_0,F)$
+  \begin{itemize}
+    \item states $Q$,
+    \item alphabet $\Sigma$,
+    \item transition function $\delta:Q\times \Sigma \to (Q \cup \{\epsilon\})$
+    where $\epsilon$ is a special sink state,
+    \item initial states $q_0\in Q$,
+    \item final states $F\subseteq Q$.
+  \end{itemize}
+\end{definition}
+
+For a state $q\in Q$, we denote by $succ(q)$ the \emph{successor set}:
+\begin{align*}
+  succ(q):=\{r\in Q_\epsilon \mid r\neq \epsilon \wedge \exists \sigma \in \Sigma:\ r=\delta(q,\sigma)\} \ .
+\end{align*}
+
+\begin{definition}[Traces of an Automaton]
+  
+\end{definition}
+
+\begin{definition}[Simulation Relation]
+  Let $A=(Q,\Sigma,\delta,q_0,F)$ be an automaton.
+  A simulation relation $R\subseteq Q\times Q$ is a binary relation
+  such that:
+\begin{align*}
+  (q,q')\in R \ \Longrightarrow \ \forall r\in succ(q)\ \exists r'\in succ(q'): (r,r')\in R \ .
+\end{align*}
+\end{definition}
+
+\subsection{Dependency-Chain Automata}
+
+In this subsection, we revisit an automata-theoretic characterisation
+of Mazurkievicz traces, in terms of the language of an automaton.
+%
+We develop this automaton in two steps.
+As a first step, we give an automaton that only observes
+shared accesses and stores resulting transitive dependencies
+between threads.
+The language of this automaton is the set of all possible interleavings.
+%
+In a second step, we define a constrained automaton that 
+filters out redundant, i.e., Mazurkievicz-equivalent traces.
+%
+\begin{definition}[Dependency-Chain Automaton]
+
+The dependency-chain automaton $A_D$ is defined as follows:
+%
+\begin{itemize}
+
+  \item states $Q_D= ({2^{Access}})^T \times \{-1,0,1\}^{T\times T}$
+  \begin{itemize}
+    \item set of accesses per thread $Acc \subseteq Access^T$,
+    \item dependency matrix $DM \in \{-1,0,1\}^{T\times T}$;
+  \end{itemize}
+  \item alphabet $\Sigma:= T\times Access$ consists of pairs
+  of thread identifiers and accesses;
+  \item transition function $\delta_D$ is defined by:
+  $\delta_D(q, \sigma) = q'$ where
+  \begin{itemize}
+    \item current state $q=(acc, dm)$
+    \item action $\sigma=(i, a)$
+    \item successor state $q'=(acc', dm')$ with
+    \begin{itemize}
+      \item $acc'=acc[i\mapsto a]$ 
+      \item successor dependency matrix:
+      \begin{align*}
+       {dm'}_{a,b} & =
+       \begin{cases}
+       1                                                        & ;\  a=b=i\\
+       -1                                                       & ;\ a=i\neq b \\
+       dm_{p,q}                                                 & ;\ a\neq i, b\neq i \\
+       0                                                        & ;\ a\neq i, b=i, dm_{b,b}=0\\
+       \bigvee_{l=1..n} \left (dm_{a,l}=1 \wedge dep_{l,i} \right) & ;\ a\neq i, b=i, dm_{b,b}\neq 0\\
+       \end{cases}
+      \end{align*}
+      where $dep_{l,i}= dep(acc(l), a)$
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Partial-Order Automaton]
+\label{def:rautomaton}
+%
+  Given the dependency-chain automaton $A_D=(Q_D,\Sigma,\delta_D,q_0,F)$,
+  a reduced dependency-chain automaton can be defined by constraining the
+  transition function of the dependency-chain automaton by the following
+  guard predicate:
+%
+    \begin{itemize}
+      \item $guard(q_0,\sigma,.)=1$
+      \item $guard(q, (i,a), q')=\bigwedge_{j>i}  ( {q.dm}_{j,i}(k)= -1 \Longrightarrow \bigvee_{l<i} {{q'}.dm}_{j,l}=1)$
+    \end{itemize}
+%
+  such that the reduced transition function is defined by:
+%
+    \begin{align*}
+      \delta_{RD}(q, \sigma) =
+        \begin{cases}
+          q' & ; \ guard(q,\sigma,q')=1\\
+          \epsilon & ; \ guard(q,\sigma,q')=0
+        \end{cases}
+    \end{align*}
+%
+We call this reduced automaton \emph{partial-order automaton}.
+\end{definition}
+
+\begin{lemma}
+  The traces of the reduced dependency-chain automaton consists of
+  all Mazurkievicz traces.
+\end{lemma}
+
+\section{Subsumption Order}
+%
+The following result is new: we define a ordering over states of the reduced dependency-chain automaton,
+and prove that it constitues a simulation relation.
+%
+The consequence of this result is that the simulation relation can be used for state-subsumption reduction
+and quotienting of automata.
+
+Subsumption order relates the access sets and dependency matrices of two states,
+and is formally defined as follows.
+
+\begin{definition}[Subsumption Order $\preceq_{sub}$]
+Let $A_{RD}=(Q_D,\Sigma,\delta_D,q_0,F)$ be a partial-order automaton.
+We define the following binary relation $\preceq_{sub} \subseteq Q_D \times Q_D$.
+Let $q=(acc, dm)$ and $q'=(acc', dm')$ be two states,
+we define
+\begin{align*}
+\forall q'\in Q:\quad \epsilon &\preceq q' \\
+\forall q,q'\in Q:\quad q &\preceq q' \quad :\overset{def}{\Longleftrightarrow} \quad acc_R \subseteq acc'_R \wedge acc_W \subseteq acc'_W \wedge dm \sqsubseteq dm'
+\end{align*}
+where the ordering $\sqsubseteq$ over dependency matrices is defined as follows:
+\begin{align*}
+dm \sqsubseteq dm' \quad :\overset{def}{\Longleftrightarrow} \quad \left (dm_{i,j}={dm'}_{i,j}\right) \vee \left (dm_{i,j}=-1 \right) \ .
+\end{align*}
+
+\end{definition}
+
+\begin{theorem}[Subsumption is a Simulation]
+  Subsumption order is a simulation relation.
+\end{theorem}
+
+\begin{proof}
+Assume that $q_1 \preceq q_2$. 
+By Definition~\ref{}, we need to show that 
+\mbox{$\forall r_1\in succ(q_1)\ \exists r_2\in succ(q_2): r_1 \preceq r_2$}.
+Therefore, further assume that \mbox{$r_1\in succ(q_1)$}.
+To establish our claim, we need to find a $r_2\in succ(q_2)$ such that $r_1 \preceq r_2$.
+Since $r_1\in succ(q_1)$, there exists $\sigma=(i,a)$ such that $\delta(q_1,\sigma)=r_1$.
+
+\underline{Claim:} State $r_2 := \delta(q_2,\sigma)$ fulfills $r_1 \preceq r_2$.
+
+We prove this property in the subsequent Lemma~\ref{def:decision_matrix_monotonic}.
+$\qed$
+\end{proof}
+
+\begin{lemma}[Update Monotonicity]
+\begin{align*}
+q_1 \preceq q_2\quad \Longrightarrow \quad \delta(q_1,\sigma) \preceq \delta(q_2,\sigma)
+\end{align*}
+
+\label{def:decision_matrix_monotonic}
+\end{lemma}
+
+\begin{proof}
+  At this point, we need to exploit the specific properties of the transition
+  function of the partial-order automaton. To this end,
+  we denote $q_1=(acc_1,dm_1)$, $q_2=(acc_2, dm_2)$.
+  Further, we denote \mbox{$r_1=(acc_1[i\mapsto a], dm'_1)$} and \mbox{$r_1=(acc_2[i\mapsto a], dm'_2)$}.
+
+  \begin{itemize}
+    \item Note that $acc_1[i\mapsto a] \subseteq acc_2[i\mapsto a]$, as replacement is monotonic.
+    \item Finally, we need to establish that the update on the decision matrix is monotonic $dm'_1 \sqsubseteq dm'_2$.
+  \end{itemize}
+
+
+\underline{Case: $a\neq i, b=i$:}
+
+  Suppose that $(dm_1)_{b,b}=0$, then $(dm_2)_{b,b}=0$, and thus $(dm'_1)_{a,b}=(dm'_2)_{a,b}=0$.
+  Therefore, assume $(dm_1)_{b,b}\neq 0$.
+  Then the term that defines $(dm'_1)_{a,b}$ is:
+  \begin{align*}
+  \bigvee_{l=1..n} \left ({(dm_1)}_{a,l}=1 \wedge {dep}_{l,i} \right)
+  \end{align*}
+  is either $-1$ or $1$.
+  It is $1$ if there exists an index $l$ such that ${(dm_1)}_{a,l}=1$ and ${dep}_{l,i}$.
+  If it is $1$, by the ordering constraint $dm_1 \sqsubseteq dm_2$, ${(dm_1)}_{a,l}=1$ implies
+  ${(dm_2)}_{a,l}=1$. Altogether, therefore ${(dm'_1)}_{a,b}=1$ implies ${(dm'_2)}_{a,b}=1$.
+$\qed$
+\end{proof}
+
+%
+When applying a simulation relation for automata reduction,
+it is desirable to have a largest simulation relation,
+in order to obtain the maximally-achievable reduction.
+%
+The following lemma establishes this optimality property for subsumption order.
+%
+\begin{theorem}[Subsumption is the largest Simulation]
+
+\end{theorem}
+%
+\begin{proof}
+
+
+$\qed$
+\end{proof}
+%
+
+The simulation result can be used for state subsumption in 
+the automaton defined in Defintion~\ref{def:rautomaton}.
+
+
+While subsumption order is the largest simulation relation for
+a given dependency-chain automaton, 
+one can do better when composing the dependency-chain automaton
+with a concrete program. 
+These optimisation require leveraging knowledge about the program
+to predict presence or absence of certain future accesses.
+
+
+\bibliographystyle{plain} %or alpha or splncs
+\bibliography{db}
+
+\ifx\versiont\longversion
+\input{appendix}
+\fi
+
+
+\end{document}

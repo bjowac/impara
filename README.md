@@ -4,21 +4,17 @@ What is Impara?
 Impara is a software model checker for multi-threaded C programs with POSIX and WIN 32 threads.
 Build instructions
 
-1. Obtain CBMC (tested SVN version 4789):
+* Obtain CBMC (tested SVN version 4789):
 
 svn co http://www.cpurover.org/svn/cbmc/trunk cbmc
 
-2. Obtain Impara from the svn:
-
-svn co http://www.cprover.org/svn/software/impara/
-
-3. Set the path to CBMC in the Impara config file. For this, please modify variable CBMC in file:
+* Set the path to CBMC in the Impara config file. For this, please modify variable CBMC in file:
 
 impara/trunk/src/config.template
 
 copy the file to impara/trunk/src/config.
 
-4. Run make in directory impara/trunk/src
+* Run make in directory impara/trunk/src
 Command-line options
 
 –error-label ERROR

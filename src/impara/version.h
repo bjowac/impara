@@ -1,0 +1,1 @@
+#define IMPARA_VERSION "0.2"

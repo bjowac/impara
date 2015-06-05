@@ -6,7 +6,7 @@ Build instructions
 
 1. Obtain CBMC (tested SVN version 4789):
 
-svn co -r4789 http://www.cpurover.org/svn/cbmc/trunk cbmc
+svn co http://www.cpurover.org/svn/cbmc/trunk cbmc
 
 2. Obtain Impara from the svn:
 

@@ -100,7 +100,7 @@ public:
 
   global_vectort global_vector;
   
-  node_reft &new_node(statet &state)
+  node_reft &new_node(class statet &state)
   {
     state.get_global_pc(global_vector);
 

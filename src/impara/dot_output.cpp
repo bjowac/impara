@@ -213,7 +213,7 @@ void nodest::dot_output(std::ostream& out, std::set<unsigned>& visible)
         unsigned thread=node.thread_nr;
 
         // * get the current instruction
-        const loc_reft predecessor_pc = node.history->pc; 
+        const loc_reft predecessor_pc = node.history->pc;
         const loct &loc=locs[predecessor_pc];
         const goto_programt::instructiont &instruction=*loc.target;
 
@@ -337,66 +337,6 @@ void nodest::dot_output(std::ostream& out, std::set<unsigned>& visible)
       }
      
       out << "\\n"+node.dc.pretty();
-      
-      
-      #ifdef IMPARA_BIDIR
-      out << "C={";
-      for(node_reft::listt::const_iterator 
-      	  node_iterator=node.covered_by.begin();
-          node_iterator!=node.covered_by.end();
-      	  ++node_iterator)
-      {
-				node_reft node_ref=*node_iterator;
-	      if(node_iterator!=node.covered_by.begin())
-	      {
-	        out <<",";
-	      }
-
-      	out << node_ref->number;
-      }
-      out <<"}\\n";
-			#endif
-      
-      
-      
-      out << "E={";
-      for(nodet::thread_sett::const_iterator 
-      	  thread_iterator=node.expanded_threads.begin();
-          thread_iterator!=node.expanded_threads.end();
-      	  ++thread_iterator)
-      {
-        unsigned thread_nr=*thread_iterator;
-	      if(thread_iterator!=node.expanded_threads.begin())
-	      {
-	        out <<",";
-	      }
-
-      	out <<i2string(thread_nr);
-      }
-      out <<"}\\n";
-
-
-      //out << "Sum " << node.path_summary.pretty(ns) << " ";
-
-      out << "S={";
-      for(nodet::sleep_sett::const_iterator 
-      	  sleep_iterator=node.sleep.begin();
-          sleep_iterator!=node.sleep.end();
-      	  ++sleep_iterator)
-      {
-        unsigned thread_nr=sleep_iterator->first;
-        unsigned node_nr=sleep_iterator->second->node_ref->number;
-	      if(sleep_iterator!=node.sleep.begin())
-	      {
-	        out <<",";
-	      }
-
-      	out <<i2string(thread_nr)<<"@N"<<node_nr << " "; // << sleep_iterator->second->pretty(ns, locs, prop);
-      }
-      out <<"}\\n";
-
-
-      out <<" \"";
 
       out << "];"<<std::endl;
    

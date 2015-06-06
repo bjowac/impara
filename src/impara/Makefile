@@ -30,14 +30,9 @@ SRC = main.cpp\
       nodes.cpp\
       interleaving/mpor/partial_order_reduction.cpp\
       interleaving/utility/shared_step.cpp\
-      interleaving/utility/sensitivity.cpp\
       simple_checker.cpp\
       interval_checker.cpp\
-      interleaving/dpor/path_summary.cpp\
-      interleaving/dpor/path_visitor.cpp\
-      interleaving/dpor/happens_before.cpp\
       interleaving/utility/dependency_check.cpp\
-      interleaving/dpor/dpor.cpp\
       interleaving/mpor/dependency_chain.cpp\
       domains/interval_dom.cpp\
       $(CBMC)/src/cbmc/xml_interface.cpp
@@ -71,8 +66,8 @@ $(patsubst %, %.dir, $(IMPARA_DIRS)):
 	$(MAKE) $(MAKEARGS) -C $(basename $@)
 
 
-CP_CXXFLAGS += -g
-LINKFLAGS += -g
+CP_CXXFLAGS += 
+LINKFLAGS +=
 
 all: impara$(EXEEXT)
 

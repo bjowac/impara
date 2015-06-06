@@ -197,6 +197,10 @@ impara_var_mapt::var_infot &impara_var_mapt::operator()(
     result.first->second.suffix=suffix;
     result.first->second.type=type;
     init(result.first->second);
+    if(result.first->second.is_shared())
+    {
+      shared_id_vec.push_back(full_identifier);
+    }
   } else
   {
     #ifdef DEBUG

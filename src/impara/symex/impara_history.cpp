@@ -22,6 +22,8 @@ Author: Daniel Kroening, kroening@kroening.com
 #include "impara_history.h"
 
 #include "from_ssa.h"
+
+#include <symex/state.h>
 #include "../nodes.h" // NOTE: remove for CPROVER main branch
 
 #include "../simple_checker.h"

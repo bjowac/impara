@@ -30,7 +30,6 @@ Function: refine
 bool nodet::refine(
   const namespacet &ns,
   merge_full_irept &merge,
-  unsigned refinements, 
   const exprt &other)
 {  
   if(label.is_nil())
@@ -52,8 +51,6 @@ bool nodet::refine(
   
   if(label.is_false())
     ++coverings;
-  
-  refinement=refinements;
   
   return true;
 }
@@ -143,34 +140,6 @@ void node_reft::ancestors_same_class(std::vector<node_reft> &result)
     if(current.node_equiv_class==node_equiv_class) 
       result.push_back(current);
   }
-}
-
-/*******************************************************************\
-
-Function: nodet::subset
-
-  Inputs:
-
- Outputs:
-
- Purpose:
-
-\*******************************************************************/
-
-bool nodet::subset(const thread_sett& s1, const thread_sett& s2)
-{
-  if(s1.size() > s2.size())
-    return false;
-
-  for(thread_sett::const_iterator 
-      it=s1.begin();
-      it!=s1.end();
-      ++it)
-  {
-    if(s2.find(*it)==s2.end())
-      return false;
-  }
-  return true;
 }
 
 /*******************************************************************\
@@ -291,35 +260,6 @@ Function: node_equiv_classt
 
 node_equiv_classt::node_equiv_classt(const locst &locs, const global_vectort& global_vector)
 {
-}
-
-
-/*******************************************************************\
-
-Function: nodet::intersect
-
-  Inputs:
-
- Outputs:
-
- Purpose:
-
-\*******************************************************************/
-
-bool nodet::intersect(const thread_sett& s1, const thread_sett& s2)
-{
-  if(s1.empty() || s2.empty())
-    return false;
-  
-  for(thread_sett::const_iterator 
-      it=s1.begin();
-      it!=s1.end();
-      ++it)
-  {
-    if(s2.find(*it)!=s2.end())
-      return true;
-  }
-  return false;
 }
 
 

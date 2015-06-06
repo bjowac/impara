@@ -8,9 +8,6 @@
 #include <path-symex/locs.h>
 #include <path-symex/loc_ref.h>
 
-
-#include "../utility/sensitivity.h"
-
 #include "partial_order_reduction.h"
 
 //#define DEBUG
@@ -385,15 +382,3 @@ void mono_partial_order_reductiont::print(const sharedt::sett& es)
   std::cout << "}";
 }    
 
-
-node_reft last_expanded(node_reft node_ref, unsigned thread)
-{
-  while(!node_ref.is_nil() && !node_ref->expanded(thread))
-  {
-    if(node_ref->thread_nr==thread)
-      return node_reft();		
-    --node_ref;
-  }
-	
-  return node_ref;
-}

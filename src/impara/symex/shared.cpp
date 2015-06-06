@@ -83,7 +83,8 @@ bool sharedt::shared_rec(const exprt& expr, sett& vars)
       return true;
     }
   } 
-  else if(expr.id()==ID_index)
+  
+  else if(false && expr.id()==ID_index)
   {
     sett vars_tmp;
   

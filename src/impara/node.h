@@ -44,30 +44,30 @@ public:
 
   // cover set of this node
   node_reft::listt cover; 
- 
+
+  impara_step_reft history;
+
   bool is_covered() const;
   
   inline bool is_cover_candidate(nodet &node) const
   {
     return has_label() && !is_covered() && node.dc < dc
-	/* && node.no_interleavings >= no_interleavings */;
+	   && node.no_interleavings >= no_interleavings;
   }
 
   bool has_label() const;
 
-  bool operator==(const nodet& other)
-  {
-    return number == other.number;
-  }
-  
   const exprt &get_label() { return label; }
 
   bool refine(const namespacet &ns,
               merge_full_irept &merge,
               const exprt &other);
-
-  impara_step_reft history;
-   
+ 
+  inline bool operator==(const nodet& other)
+  {
+    return number == other.number;
+  }
+  
 protected:
   friend class node_reft;
   unsigned uncover_all();

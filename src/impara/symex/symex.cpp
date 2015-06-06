@@ -964,6 +964,8 @@ void symext::operator()(
       statet::threadt &old_thread=state.threads[state.get_current_thread()];
       new_thread.pc=loc.branch_target;
       
+      unsigned current_thread=state.get_current_thread();
+      
       // copy over local variables to new_thread
       for(statet::var_valt::const_iterator
           var_it=old_thread.local_vars.begin();

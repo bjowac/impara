@@ -6,7 +6,6 @@ Author: Bjorn Wachter, bjoern.wachter@gmail.com
 
 \*******************************************************************/
 
-#include <util/arith_tools.h>
 #include <util/prefix.h>
 
 #include "shared.h"
@@ -32,7 +31,6 @@ bool sharedt::shared(const exprt& expr, sett& vars)
   try
   {
     exprt tmp=state.read_no_propagate(expr);
-    
     return shared_rec(tmp, vars);
   } catch (...)
   {
@@ -68,12 +66,10 @@ bool sharedt::shared_rec(const exprt& expr, sett& vars)
     const std::string id_string(id2string(identifier));
 
     // exclude thread id (symmetry argument)
-    if(has_prefix(id_string, "__CPROVER_thread_id")
+    if(has_prefix(id2string(id_string), "__CPROVER_thread_id")
        || has_prefix(id_string, "__CPROVER_next_thread_id"))
-    {
       return false;
-    }
- 
+
     impara_var_mapt::var_infot &var_info=
       state.var_map(identifier, "", expr.type());
     
@@ -82,43 +78,6 @@ bool sharedt::shared_rec(const exprt& expr, sett& vars)
       vars.insert(var_info.number);
       return true;
     }
-  } 
-  else if(expr.id()==ID_index)
-  {
-    sett vars_tmp;
-  
-    if(!shared_rec(expr.op0(), vars_tmp))
-    {    
-      return false;
-    }
-
-    exprt index=state.read(expr.op1());
-    
-    if(index.id()==ID_constant)
-    {
-      for(sett::const_iterator it=vars_tmp.begin();
-          it!=vars_tmp.end();
-          ++it)
-      {
-        std::string id=state.var_map.shared_id_vec[*it].c_str();
-          
-        id+=state.array_index_as_string(index);
-      
-        // TODO: refine here
-      
-        impara_var_mapt::var_infot &var_info=
-          state.var_map(
-            id, "", expr.type());
-
-        vars.insert(var_info.number);            
-      }
-    }  
-    else 
-    {
-      vars.insert(vars_tmp.begin(), vars_tmp.end());   
-    }
-    
-    return true;
   }
   else
   {

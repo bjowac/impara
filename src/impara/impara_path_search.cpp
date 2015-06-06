@@ -90,7 +90,14 @@ safety_checkert::resultt impara_path_searcht::operator () (
       return safety_checkert::SAFE;
     }
 
-    search();
+    if(do_dpor)
+    {
+      dpor_search();
+    }
+    else
+    {
+      search();
+    }
 
     report_statistics();
     report_limits();      
@@ -457,7 +464,7 @@ bool impara_path_searcht::succ(unsigned t,
     if(do_labeling)
     {    
       exprt label=abstract_transformer(successor);
-      node_ref->refine(ns, merge, label);
+      node_ref->refine(ns, merge, refinements, label);
     }
   }
 
@@ -775,7 +782,7 @@ void impara_path_searcht::search()
     if(drop_state(state))
     {
       // make sure that this node cannot cover anything
-      state.node_ref->refine(ns, merge, false_exprt());
+      state.node_ref->refine(ns, merge, refinements, false_exprt());
       queue.erase(choice);
       ++number_of_dropped_states;
       continue;

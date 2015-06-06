@@ -172,7 +172,7 @@ bool impara_path_searcht::force_cover(statet &state,
             false,
             loop))
         {    
-          state.node_ref->refine(ns, merge, *it);
+          state.node_ref->refine(ns, merge, refinements, *it);
         } else
         {
           covered=false;
@@ -204,7 +204,7 @@ bool impara_path_searcht::force_cover(statet &state,
                 false,
                 loop))
       {    
-        state.node_ref->refine(ns, merge, can);
+        state.node_ref->refine(ns, merge, refinements, can);
       } else
       {
         covered=false;
@@ -357,7 +357,7 @@ bool impara_path_searcht::path_check(statet &state,
   // stop time
   
   // doesn't work with SMT2
-  solver_stats.log_end((satcheckt&)solver.satcheck);
+  //solver_stats.log_end((satcheckt&)solver.satcheck);
 
   switch(dp_result)
   {
@@ -540,7 +540,7 @@ bool impara_path_searcht::interpolate(
 
         merge(label);
 
-       	node.refine(ns, merge, label);
+       	node.refine(ns, merge, refinements, label);
       
         if(do_show_vcc)
         {

@@ -87,8 +87,6 @@ public:
 
   const namespacet &ns;
 
-  std::vector<irep_idt> shared_id_vec;
-
 protected:
   unsigned shared_count, local_count;
   var_infot dummy;

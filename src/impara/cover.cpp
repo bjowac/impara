@@ -118,19 +118,19 @@ bool impara_path_searcht::force_cover(statet &state,
     ++attempts;
 
     node_reft other_ref(node_equiv_class, i);
+
     node_reft 
       ancestor=state.node_ref.nearest_common_ancestor(other_ref);
 
-    if(ancestor.is_nil() || !ancestor->has_label())
+    if(ancestor.is_nil())
       continue;
-
-    bool loop=(other_ref==ancestor); 
   
+    bool loop=(other_ref==ancestor); 
+ 
     if(loop && cutpoints.count(state.pc())==0)
     {
       continue;
     }
-  
   
     ++force_cover_checks_total;
 
@@ -140,75 +140,45 @@ bool impara_path_searcht::force_cover(statet &state,
 
     bool covered=true;
  
-    if(do_propagation && can.id()==ID_and)
-    {
- 
-      forall_operands(it, can)
-      {
-        exprt check=state.read(*it);
+    exprt check=state.read(can);
 
-        if(check.is_false())
-        {
-          covered=false;
-          continue;
-        }
-     
-        if(do_show_vcc)
-        {
-
-          std::cout << "Force cover: " << state.node_ref->number 
-            << " by " << other.number << "?" << std::endl;
-          std::cout << "Force cover: nearest common ancestor " 
-            << ancestor->number << std::endl;
-        }  
-        
-        // check
-        if(refine(
-            state,               
-            ancestor,    
-            pre,     
-            *it,  
-            force_cover_solver_stats,
-            false,
-            loop))
-        {    
-          state.node_ref->refine(ns, merge, *it);
-        } else
-        {
-          covered=false;
-        }
-      }
-    }
-    else
-    {
-      exprt check=state.read(can);
-
-      if(check.is_false())
-        continue;
-   
-      if(do_show_vcc)
-      {
-
-        std::cout << "Force cover: " << state.node_ref->number 
-          << " by " << other.number << "?" << std::endl;
-        std::cout << "Force cover: nearest common ancestor " 
-          << ancestor->number << std::endl;
-      }  
+    if(check.is_false())
+      continue;
+    else {
+      #if 0
+      impara_solvert solver(ns);
       
-      // check
-      if(refine(state,               
-                ancestor,    
-                pre,     
-                can,  
-                force_cover_solver_stats,
-                false,
-                loop))
-      {    
-        state.node_ref->refine(ns, merge, can);
-      } else
+      solver.set_to_false(can);
+      
+      if(solver.dec_solve() == decision_proceduret::D_UNSATISFIABLE)
       {
-        covered=false;
+        continue;
       }
+      #endif
+    }
+ 
+    if(do_show_vcc)
+    {
+
+      std::cout << "Force cover: " << state.node_ref->number 
+        << " by " << other.number << "?" << std::endl;
+      std::cout << "Force cover: nearest common ancestor " 
+        << ancestor->number << std::endl;
+    }  
+    
+    // check
+    if(refine(state,               
+              ancestor,    
+              pre,     
+              can,  
+              force_cover_solver_stats,
+              false,
+              loop))
+    {    
+      state.node_ref->refine(ns, merge, can);
+    } else
+    {
+      covered=false;
     }
 
     
@@ -536,14 +506,14 @@ bool impara_path_searcht::interpolate(
 
       if(!imp)
       {
-        exprt old_label=node.get_label();
-
         merge(label);
 
        	node.refine(ns, merge, label);
       
         if(do_show_vcc)
         {
+          exprt old_label=node.get_label();
+        
           status() << "Label@" << node.number << "\n"
                    << "     " 
                    << from_expr(ns, "     ", label) << "\n"
@@ -553,36 +523,8 @@ bool impara_path_searcht::interpolate(
                    << from_expr(ns, "     ", node.get_label()) 
                    << eom;
         } 
-         
-        if(do_refine_close)
-        {
-          if(pruned_node_ref.is_nil() && close(node_ref)) 
-          {
-            pruned_node_ref=node_ref;
-          }
-        }
       }
-    } else {   
-
-      if(do_show_vcc)
-      {
-        status() << "Keeping label@" << node.number << " "
-                 << from_expr(ns, "", node.get_label()) << eom;
-      }
-
-
-      //++cover_checks_ok;
-    }
-  }
- 
-  if(do_show_vcc)
-  {
-    if(!pruned_node_ref.is_nil())
-    {
-      status() << "Refinement prunes ART at N" 
-               << pruned_node_ref->number
-               << eom;
-    }
+    } 
   }
   
   return true;

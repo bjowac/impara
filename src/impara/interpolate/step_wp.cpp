@@ -165,6 +165,22 @@ Function: expand_if
 
 \*******************************************************************/
 
+
+exprt simplified_if(
+  const exprt &cond,
+  const exprt &a,
+  const exprt &b,
+  const namespacet &ns)
+{
+  exprt lhs=cond;
+  impara_conjoin(a, lhs, ns);
+  exprt rhs=not_exprt(cond);
+  impara_conjoin(b, rhs, ns);
+  impara_disjoin(lhs, rhs, ns);
+  
+  return rhs;
+}
+
 void rewrite_if(exprt &dest,
               const namespacet &ns)
 {
@@ -192,12 +208,28 @@ void rewrite_if(exprt &dest,
     {
       const typecast_exprt& tc=to_typecast_expr(dest.op0());
 
+      if(dest.op1().type()!=tc.op0().type())
+      {
+        dest.op1()=typecast_exprt(dest.op1(), tc.op0().type());
+      }
+      
+      dest.op0()=tc.op0();
+      
+      rewrite_if(dest, ns);
+      
+      return;
+
       if(tc.op0().id()==ID_if)
       {
 	      const if_exprt &if_expr=to_if_expr(tc.op0());
-	      dest=if_exprt(if_expr.cond(), 
-                      binary_relation_exprt( typecast_exprt(if_expr.true_case(),tc.type()), dest.id(), dest.op1()), 
-			                binary_relation_exprt( typecast_exprt(if_expr.false_case(),tc.type()), dest.id(), dest.op1()));
+
+        exprt a=binary_relation_exprt( typecast_exprt(if_expr.true_case(),tc.type()), dest.id(), dest.op1());
+			  exprt b=binary_relation_exprt( typecast_exprt(if_expr.false_case(),tc.type()), dest.id(), dest.op1());
+			  
+			  rewrite_if(a, ns);
+			  rewrite_if(b, ns);
+
+	      dest=if_exprt(if_expr.cond(), a, b);
 	      return;
       }
     }
@@ -207,9 +239,13 @@ void rewrite_if(exprt &dest,
     {
       const if_exprt &if_expr=to_if_expr(dest.op0());
 
-      dest=if_exprt(if_expr.cond(), 
-                    binary_relation_exprt( if_expr.true_case(), dest.id(), dest.op1()),
-		                binary_relation_exprt( if_expr.false_case(), dest.id(), dest.op1()));
+      exprt a=binary_relation_exprt( if_expr.true_case(), dest.id(), dest.op1());
+      exprt b=binary_relation_exprt( if_expr.false_case(), dest.id(), dest.op1());
+
+      rewrite_if(a, ns);
+      rewrite_if(b, ns);
+      
+      dest=if_exprt(if_expr.cond(), a, b);
       return;
     } else if(dest.op1().id()==ID_if) 
     {
@@ -303,21 +339,20 @@ exprt step_wp(
   
   const symbol_exprt &ssa_lhs_symbol(to_symbol_expr(step.ssa_lhs));
 
+  bool change=false;
+
   // wp(a:=b, x) = x[a<-b]
   if(step.full_lhs.is_not_nil() && has_symbol(ssa_lhs_symbol, wp))
   {
+
     // do we do a nondet-assignment?
-    if(
-       step.ssa_rhs.is_nil())
+    if (step.ssa_rhs.is_nil() || 
+         (  
+           step.ssa_rhs.id()==ID_symbol &&
+           has_prefix(id2string(to_symbol_expr(step.ssa_rhs).get_identifier()), "symex::nondet")
+         )
+       ) 
     {
-      wp=eliminate_forall(step.ssa_lhs, wp, ns);
-    }
-    else if 
-      (step.ssa_rhs.id()==ID_symbol &&
-       has_prefix(id2string(to_symbol_expr(step.ssa_rhs).get_identifier()), "symex::nondet")) 
-    {
-      rewrite_if(wp, ns);
-      
       wp=eliminate_forall(step.ssa_lhs, wp, ns);
     }
     else
@@ -327,6 +362,8 @@ exprt step_wp(
     }
 
     simplify_byte_expr(wp, ns);
+
+    change=true;
   }
   
   if(!step.is_hidden())
@@ -337,9 +374,15 @@ exprt step_wp(
       exprt negated_guard=not_exprt(step.guard);
 
       impara_disjoin(negated_guard, wp, ns);
+
+      change=true;
     }
   }
   
+  if(change)
+  { 
+    rewrite_if(wp, ns);
+  }
   
   return wp;
 }

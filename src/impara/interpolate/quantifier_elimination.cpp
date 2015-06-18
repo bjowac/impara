@@ -382,9 +382,14 @@ exprt eliminate_forall(
 
   syntactic_elimination(quantifier, src2, ns);
 
+
   // try syntactic criteria
   if(!has_symbol(quantifier, src2))
   {
+    #ifdef DEBUG
+    std::cout << "Successful syntactic QE" << std::endl;
+    #endif
+
     dest=src2;
   }
   else

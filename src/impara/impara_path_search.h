@@ -45,6 +45,7 @@ public:
     do_eager       (false),
     do_simplify    (true),
     do_bfs         (false),
+    do_check_proof (false),	
     do_show_vcc    (false),
     thread_limit   (std::numeric_limits<int>::max()),
     force_limit    (2),
@@ -84,7 +85,8 @@ protected:
        do_sleep,
        do_eager,
        do_simplify,
-       do_bfs;
+       do_bfs,
+       do_check_proof;
   
   bool do_show_vcc;
 
@@ -165,6 +167,7 @@ protected:
   void set_labels(statet &state);
 
   bool path_check(statet &state, 
+              impara_step_reft &history,
               node_reft ancestor,
               exprt& assumption, 
               exprt& conclusion,
@@ -174,6 +177,7 @@ protected:
               bool loop);
 
   bool interpolate(
+              statet& state,
               impara_step_reft history,
               node_reft node,
               node_reft ancestor,

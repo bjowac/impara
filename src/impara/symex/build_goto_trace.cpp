@@ -126,25 +126,22 @@ void build_goto_trace(
   const goto_programt::instructiont &instruction=
     *state.get_instruction();
 
-  assert(instruction.is_assert());
-    
-  {
-    goto_trace_stept trace_step;
+  goto_trace_stept trace_step;
 
-    trace_step.pc=state.get_instruction();
-    trace_step.thread_nr=state.get_current_thread();
-    trace_step.step_nr=steps.size();
-    trace_step.type=goto_trace_stept::ASSERT;
+  trace_step.pc=state.get_instruction();
+  trace_step.thread_nr=state.get_current_thread();
+  trace_step.step_nr=steps.size();
+  trace_step.type=goto_trace_stept::ASSERT;
 
-    const irep_idt &comment=
-      instruction.source_location.get_comment();
+  const irep_idt &comment=
+    instruction.source_location.get_comment();
 
-    if(comment!=irep_idt())
-      trace_step.comment=id2string(comment);
-    else
-      trace_step.comment="assertion";
+  if(comment!=irep_idt())
+    trace_step.comment=id2string(comment);
+  else
+    trace_step.comment="assertion";
 
-    goto_trace.add_step(trace_step);  
-  }
+  goto_trace.add_step(trace_step);  
+
 }
 

@@ -371,6 +371,11 @@ void impara_parse_optionst::get_command_line_options(optionst &options)
   if(cmdline.isset("bfs"))
     options.set_option("bfs", true);
 
+  if(cmdline.isset("check-proof"))
+    options.set_option("check-proof", true);
+  else
+    options.set_option("check-proof", false);
+
   if(cmdline.isset("node-limit"))
     options.set_option("node-limit", cmdline.get_value("node-limit"));
   else
@@ -522,6 +527,7 @@ int impara_parse_optionst::doit()
   impara_path_search.do_bfs=options.get_bool_option("bfs");
   impara_path_search.node_limit=options.get_signed_int_option("node-limit");
   impara_path_search.unwind_limit=options.get_signed_int_option("unwind-limit");
+  impara_path_search.do_check_proof=options.get_signed_int_option("check-proof");
 
   //impara_path_search.set_ui(get_ui());
 

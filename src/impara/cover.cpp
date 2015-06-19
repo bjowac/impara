@@ -115,7 +115,6 @@ bool impara_path_searcht::force_cover(statet &state,
     if(!other.is_cover_candidate(node))
       continue;
 
-    ++attempts;
 
     node_reft other_ref(node_equiv_class, i);
 
@@ -124,6 +123,8 @@ bool impara_path_searcht::force_cover(statet &state,
 
     if(ancestor.is_nil())
       continue;
+
+    ++attempts;
   
     bool loop=(other_ref==ancestor); 
  
@@ -214,7 +215,9 @@ Function: impara_path_searcht::refine
 
 \*******************************************************************/
 
-bool impara_path_searcht::path_check(statet &state, 
+bool impara_path_searcht::path_check(
+                          statet &state,
+                          impara_step_reft &history, 
                           node_reft ancestor,
                           exprt& assumption, 
                           exprt& conclusion,
@@ -278,12 +281,12 @@ bool impara_path_searcht::path_check(statet &state,
   // SSA constraints
   solver.set_to(assumption, true);
 
-  solver.set_to(simple_checker.propagation(conclusion), false);
+  solver.set_to(do_simplify ? simple_checker.propagation(conclusion) : conclusion, false);
 
   std::vector<literalt> guard_literals;
   std::vector<exprt> guards;
 
-  state.history.convert(solver,
+  history.convert(solver,
     ancestor,
     simple_checker.propagation,
     guard_literals,
@@ -367,7 +370,7 @@ bool impara_path_searcht::path_check(statet &state,
           status() << "SMT solver: UNSAT" << eom;
         }
 
-        state.history.get_core_steps(solver,
+        history.get_core_steps(solver,
           ancestor,
           guard_contexts);          
         break;
@@ -412,7 +415,8 @@ bool impara_path_searcht::refine(statet &state,
                          std::cout);
   }
   
-  if(path_check(state, 
+  if(path_check(state,
+             state.history, 
              ancestor,
              assumption, 
              conclusion,
@@ -428,7 +432,9 @@ bool impara_path_searcht::refine(statet &state,
     {
       ++refinements;
 
-      result=interpolate(state.history, 
+      result=interpolate(
+                state,
+                state.history, 
                 state.node_ref, 
                 ancestor, 
                 assumption, 
@@ -469,6 +475,7 @@ Function: impara_path_searcht::interpolate
 \*******************************************************************/
 
 bool impara_path_searcht::interpolate(
+              statet &state,
               impara_step_reft history,
               node_reft node_ref,
               node_reft ancestor,
@@ -501,7 +508,7 @@ bool impara_path_searcht::interpolate(
     if(node_ref != ancestor)
     { 
       absolute_timet close_start_time=current_time();
-      bool imp=implies(node.get_label(),label, ns);
+      bool imp=false && implies(node.get_label(),label, ns);
       close_time+=current_time()-close_start_time;
 
       if(!imp)
@@ -525,6 +532,73 @@ bool impara_path_searcht::interpolate(
         } 
       }
     } 
+  }
+
+  // check the proof
+  if(do_check_proof)
+  {
+    bool save_do_simplify=do_simplify;
+    do_simplify=false;
+  
+    node_reft previous;
+
+    for(interpolatort::interpolant_mapt::iterator
+        m_it=itp_map.begin();
+        m_it!=itp_map.end();
+        m_it++)
+    {
+
+      node_reft node_ref=m_it->first;
+
+      if(!previous.is_nil()
+         && node_ref->has_label()
+         && previous->has_label()
+      )
+      {
+        simple_checkert simple_checker(locs, ns, node_ref->history, previous);  
+            
+        exprt previous_label=
+           state.history.rename(previous->label, previous);
+        
+        exprt node_label=
+           state.history.rename(node_ref->label, node_ref);
+          
+        if(!path_check(state, 
+           node_ref->history,
+           previous,
+           previous_label,
+           node_label,
+           simple_checker,
+           force_cover_solver_stats,
+           true,
+           false))
+         {   
+           std::cout << "Wrong interpolant " << std::endl;
+        
+           state.history.output(ns, 
+             locs, 
+             simple_checker.propagation,
+             previous, 
+             previous_label, 
+             node_label, 
+             std::cout);
+             
+           show_goto_trace(std::cout, ns, error_trace);  
+           
+           error_trace.clear();
+             
+         }
+         else
+         {
+           std::cout << "Verified inductiveness" << std::endl;
+         }
+       }
+       
+       previous=node_ref;
+
+    }
+    
+    do_simplify=save_do_simplify;
   }
   
   return true;

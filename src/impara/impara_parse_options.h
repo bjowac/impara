@@ -45,7 +45,7 @@ Author: Daniel Kroening, kroening@kroening.com
   "(i386-linux)(i386-macos)(i386-win32)(win32)(winx64)" \
   "(ppc-macos)(no-arch)" \
   "(no-assertions)"\
-  "(dot):"
+  "(dot):(check-proof)"
 
 
 class impara_parse_optionst:

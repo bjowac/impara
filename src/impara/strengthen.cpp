@@ -1027,7 +1027,9 @@ bool impara_path_searcht::strengthen(
           false
       );
 
+
       interpolate(
+        state,
         ancestor->history,
         ancestor,
         initial_node_ref,

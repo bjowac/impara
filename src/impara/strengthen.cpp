@@ -891,20 +891,15 @@ bool impara_path_searcht::strengthen(
     solver.set_to_context(guard_contexts[i], literal_exprt(guard_literals[i]), true);
   }
 
-
   // initialise the solver for initialisation
   impara_solvert init_solver(ns);
   {
     std::vector<literalt> guard_literals3;
+    std::vector<exprt> guard_exprs;
     
     ancestor->history.convert(init_solver,
-      initial_node_ref,
-      guard_literals3);
+      initial_node_ref);
       
-    for(unsigned i=0; i<guard_literals3.size(); ++i)
-    {
-      init_solver.set_to_true(literal_exprt(guard_literals3[i]));
-    }  
   }
 
   // initialising the solver for induction
@@ -914,13 +909,8 @@ bool impara_path_searcht::strengthen(
     std::vector<literalt> guard_literals2;
     
     state.history.convert(templ_solver,
-      ancestor,
-      guard_literals2);
+      ancestor);
       
-    for(unsigned i=0; i<guard_literals2.size(); ++i)
-    {
-      templ_solver.set_to_true(literal_exprt(guard_literals2[i]));
-    }  
   }
   
   row_templatet row_temp(ns, 

@@ -20,6 +20,7 @@ Author: Daniel Kroening, kroening@kroening.com
 void build_goto_trace(
   const statet &state,
   const decision_proceduret &decision_procedure,
-  goto_tracet &goto_trace);
+  goto_tracet &goto_trace,
+  const namespacet &ns);
 
 #endif

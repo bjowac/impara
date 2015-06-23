@@ -6,6 +6,8 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+
+#include <util/simplify_expr.h>
 #include "from_ssa.h"
 #include "build_goto_trace.h"
 
@@ -16,6 +18,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #ifdef DEBUG
 #include <iostream>
 #endif
+
 
 /*******************************************************************\
 
@@ -32,7 +35,8 @@ Function: build_goto_trace
 void build_goto_trace(
   const statet &state,
   const decision_proceduret &decision_procedure,
-  goto_tracet &goto_trace)
+  goto_tracet &goto_trace,
+  const namespacet &ns)
 {
   // follow the history in the state
   typedef std::vector<impara_step_reft> stepst; 
@@ -67,7 +71,9 @@ void build_goto_trace(
       if(record)
       {
         trace_step.full_lhs_value=decision_procedure.get(step.ssa_lhs);
-        record=record && trace_step.full_lhs_value.id() != ID_symbol;
+        simplify(trace_step.full_lhs_value, ns);
+        trace_step.lhs_object_value=decision_procedure.get(step.ssa_lhs);
+        trace_step.lhs_object=to_symbol_expr(step.full_lhs);
       }
       break;
     
@@ -78,9 +84,11 @@ void build_goto_trace(
       record=step.full_lhs.is_not_nil();
       
       if(record)
-      {          
+      {
+        trace_step.full_lhs_value=decision_procedure.get(step.ssa_lhs);
+        simplify(trace_step.full_lhs_value, ns);
+        trace_step.lhs_object_value=decision_procedure.get(step.ssa_lhs);
         trace_step.lhs_object=to_symbol_expr(step.full_lhs);
-        record=record && trace_step.full_lhs_value.id() != ID_symbol;
       }
       break;
       

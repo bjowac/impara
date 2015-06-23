@@ -342,18 +342,14 @@ bool impara_path_searcht::path_check(
     
       if(build_trace)
       {
-        guard_literals.clear();
-      
-        // solve again with full information
-        simple_checker.propagation.set_hidden(false);
+        impara_solvert solver(ns);
         
         solver.set_to(assumption, true);
         solver.set_to(conclusion, false);
         history.convert(solver,
-          ancestor,
-          guard_literals);
+          ancestor);
 
-        build_goto_trace(state, solver, error_trace);
+        build_goto_trace(state, solver, error_trace, var_map.ns);
       }
     
       if(loop && do_strengthen)

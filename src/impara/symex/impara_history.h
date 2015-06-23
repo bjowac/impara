@@ -100,8 +100,7 @@ public:
 
   // output history as SSA constraints into dest
   void convert(class prop_convt &dest, 
-              node_reft ancestor,
-              std::vector<class literalt>& literals);
+              node_reft ancestor);
  
   // output history as SSA constraints into dest
   void convert(class prop_convt &dest, 

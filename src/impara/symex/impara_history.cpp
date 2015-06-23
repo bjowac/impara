@@ -308,8 +308,7 @@ Function: impara_historyt::convert
 \*******************************************************************/
 
 void impara_step_reft::convert(class prop_convt &dest, 
-            node_reft ancestor,
-            std::vector<literalt>& literals)
+            node_reft ancestor)
 {
   bool reached_ancestor=false;
 
@@ -331,8 +330,6 @@ void impara_step_reft::convert(class prop_convt &dest,
     if(step.full_lhs.is_not_nil())
       ++i;
 
-    if(step.is_hidden()) continue; 
-
     const exprt& guard = step.guard;
     const exprt& lhs   = step.ssa_lhs;
     const exprt& rhs   = step.ssa_rhs;
@@ -342,7 +339,7 @@ void impara_step_reft::convert(class prop_convt &dest,
       if(guard.is_not_nil() &&
          !guard.is_true())
       {
-        literals.push_back(dest(guard));
+        dest.set_to(guard, true);
       }      
 
     }
@@ -364,7 +361,6 @@ void impara_step_reft::convert(class prop_convt &dest,
       {
         dest.set_to(equal_exprt(lhs, rhs.is_nil() ? lhs : rhs), true);
       }
-
     }
 
     catch (std::string &s)

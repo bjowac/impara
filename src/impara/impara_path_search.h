@@ -46,6 +46,7 @@ public:
     do_simplify    (true),
     do_bfs         (false),
     do_check_proof (false),	
+    do_graphml_cex (false),
     do_show_vcc    (false),
     thread_limit   (std::numeric_limits<int>::max()),
     force_limit    (2),
@@ -86,7 +87,8 @@ protected:
        do_eager,
        do_simplify,
        do_bfs,
-       do_check_proof;
+       do_check_proof,
+       do_graphml_cex;
   
   bool do_show_vcc;
 

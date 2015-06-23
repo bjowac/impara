@@ -253,7 +253,6 @@ bool impara_path_searcht::path_check(
         if(do_show_vcc)
           std::cout << "Simple checker: UNSATISFIABLE" << std::endl;
 
-
         if(!build_trace && !(loop && do_strengthen))
           return false;
       break; 
@@ -343,6 +342,17 @@ bool impara_path_searcht::path_check(
     
       if(build_trace)
       {
+        guard_literals.clear();
+      
+        // solve again with full information
+        simple_checker.propagation.set_hidden(false);
+        
+        solver.set_to(assumption, true);
+        solver.set_to(conclusion, false);
+        history.convert(solver,
+          ancestor,
+          guard_literals);
+
         build_goto_trace(state, solver, error_trace);
       }
     

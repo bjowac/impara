@@ -10,6 +10,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <fstream>
 #include <memory>
 #include <iostream>
+#include <fstream>
 
 #include <util/string2int.h>
 #include <util/time_stopping.h>
@@ -30,6 +31,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <goto-programs/read_goto_binary.h>
 #include <goto-programs/link_to_library.h>
 #include <goto-programs/xml_goto_trace.h>
+#include <goto-programs/graphml_goto_trace.h>
 
 #include <analyses/goto_check.h>
 
@@ -394,7 +396,15 @@ void impara_parse_optionst::get_command_line_options(optionst &options)
     options.set_option("unwind-limit", 
       std::numeric_limits<int>::max());
 
-
+  if(cmdline.isset("graphml-cex"))
+  {
+    options.set_option("graphml-cex", cmdline.get_value("graphml-cex"));
+    options.set_option("do-graphml-cex", true);
+  }
+  else
+  {
+    options.set_option("do-graphml-cex", false);
+  }
 
   if(cmdline.isset("svcomp"))
   {
@@ -528,6 +538,7 @@ int impara_parse_optionst::doit()
   impara_path_search.node_limit=options.get_signed_int_option("node-limit");
   impara_path_search.unwind_limit=options.get_signed_int_option("unwind-limit");
   impara_path_search.do_check_proof=options.get_signed_int_option("check-proof");
+  impara_path_search.do_graphml_cex=options.get_bool_option("do-graphml-cex");
 
   //impara_path_search.set_ui(get_ui());
 
@@ -541,8 +552,19 @@ int impara_parse_optionst::doit()
   case safety_checkert::UNSAFE:
     report_properties(impara_path_search.property_map);
   
-    show_counterexample(impara_path_search.error_trace);
+    show_counterexample(impara_path_search.error_trace);    
     report_failure();
+    
+    if(impara_path_search.do_graphml_cex)
+    {
+      graphmlt graphml_cex;
+      
+      convert(ns, impara_path_search.error_trace, graphml_cex);
+      
+      std::ofstream graphml_file(options.get_option("graphml-cex"));
+      write_graphml(graphml_cex, graphml_file);
+    }
+    
     return 10;
   
   default:

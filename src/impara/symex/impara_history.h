@@ -107,11 +107,12 @@ public:
               node_reft ancestor,
               class propagationt &propagation,
               std::vector<class literalt>& literals,
-              std::vector<exprt>& guards);
+              std::vector<exprt>& lazy,
+              std::vector<impara_step_reft> &steps);
 
   void get_core_steps(class prop_convt &dest, 
-            node_reft ancestor,
-            std::vector<class literalt>& literals);
+            std::vector<class literalt>& literals,
+            std::vector<impara_step_reft> &steps);
 
   // get pre/post symbols 
   void get_symbols(

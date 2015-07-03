@@ -182,7 +182,7 @@ exprt semantic_elimination(
 {
   exprt dest=true_exprt();
 
-  impara_solvert solver(ns);
+  impara_solver_no_simplifiert solver(ns);
 
   exprt core;
   exprt::operandst overflow;
@@ -240,8 +240,6 @@ exprt semantic_elimination(
   // implicit instantiation
   
  
-  solver.set_to(core, false);
-
   std::vector<exprt> instances;
   std::vector<literalt> instance_literals;
 
@@ -253,7 +251,9 @@ exprt semantic_elimination(
 
     simplify(instance, ns);
     instances.push_back(instance);
-    //instance_literals.push_back(solver(instance));
+    instance_literals.push_back(solver(instance));
+    if(!instance_literals.back().is_constant())
+      solver.set_frozen(instance_literals.back());
 
     #ifdef DEBUG
     std::cout << "   " << from_expr(ns, "", val)
@@ -261,6 +261,8 @@ exprt semantic_elimination(
               << from_expr(ns, "", instance) << std::endl;
     #endif
   }
+
+  solver.set_to(core, false);
 
   std::vector<impara_solvert::contextt> contexts;
 
@@ -274,7 +276,8 @@ exprt semantic_elimination(
     contexts.push_back(context);
     solver.set_to_context(context, literal_exprt(instance_literals[i]), true);
      */
-    solver.set_to(instances[i], true);
+     
+    solver.set_to_true(literal_exprt(instance_literals[i]));
     impara_conjoin(instances[i], dest, ns);
   }
 
@@ -336,8 +339,10 @@ exprt semantic_elimination(
     }
     #endif
    
-    contexts.push_back(solver.new_context());
-    solver.set_to_context(contexts.back(), instance, true);
+    literalt instance_literal(solver(instance));
+   
+    if(!instance_literal.is_constant() && !solver.is_eliminated(instance_literal))
+      {} // solver.set_to_true(literal_instance(exprt_literal));
     impara_conjoin(instance, dest, ns);
 
     ++counter;

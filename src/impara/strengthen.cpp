@@ -876,12 +876,14 @@ bool impara_path_searcht::strengthen(
 
   std::vector<literalt> guard_literals;
   std::vector<exprt> guards;
+  std::vector<impara_step_reft> steps;
 
   state.history.convert(solver,
     ancestor,
     simple_checker.propagation,
     guard_literals,
-    guards);
+    guards,
+    steps);
 
   std::vector<impara_solvert::contextt> guard_contexts(guard_literals.size());
 
@@ -1049,8 +1051,8 @@ bool impara_path_searcht::strengthen(
         std::cout << "Inductive at N" << ancestor->number << std::endl;
         
         state.history.get_core_steps(solver,
-                       ancestor,
-                       guard_contexts);      
+                       guard_contexts,
+                       steps);      
 
         result=true;
         repeat=false;

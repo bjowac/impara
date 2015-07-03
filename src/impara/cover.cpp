@@ -277,25 +277,30 @@ bool impara_path_searcht::path_check(
   
   impara_solvert solver(ns);
   
-  // SSA constraints
-  solver.set_to(assumption, true);
-
-  solver.set_to(do_simplify ? simple_checker.propagation(conclusion) : conclusion, false);
 
   std::vector<literalt> guard_literals;
   std::vector<exprt> guards;
+  std::vector<impara_step_reft> steps;
 
   history.convert(solver,
     ancestor,
     simple_checker.propagation,
     guard_literals,
-    guards);
+    guards,
+    steps);
+
+  // SSA constraints
+  solver.set_to(assumption, true);
+
+  solver.set_to(do_simplify ? simple_checker.propagation(conclusion) : conclusion, false);
     
   unsigned nr_guards=guard_literals.size();
 
   std::vector<impara_solvert::contextt> guard_contexts(nr_guards);
 
   decision_proceduret::resultt dp_result;   
+
+  unsigned lazy_added=0;
 
   // refinement loop
   while((dp_result=solver.dec_solve()) 
@@ -308,7 +313,7 @@ bool impara_path_searcht::path_check(
       exprt eval_guard=solver.get(guards[i]);
  
       // guard excludes model
-      if(eval_guard.is_false()) 
+      if(!eval_guard.is_true()) 
       {
         guard_contexts[i]=solver.new_context();      
         guard_added=true;
@@ -316,6 +321,8 @@ bool impara_path_searcht::path_check(
         solver.set_to_context(
           guard_contexts[i], 
           literal_exprt(guard_literals[i]), true);
+        
+        ++lazy_added;
         
         // sufficient for UNSAT?
         break;
@@ -327,6 +334,12 @@ bool impara_path_searcht::path_check(
       break;
   }
   // stop time
+  
+  if(do_show_vcc)
+  {
+    status() << "  Refinement solver added " 
+      << lazy_added << " / " << guards.size() << eom;
+  }
   
   // doesn't work with SMT2
   solver_stats.log_end((satcheckt&)solver.satcheck);
@@ -377,8 +390,8 @@ bool impara_path_searcht::path_check(
         }
 
         history.get_core_steps(solver,
-          ancestor,
-          guard_contexts);          
+          guard_contexts,
+          steps);          
         break;
       }
       default:

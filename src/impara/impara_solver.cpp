@@ -24,7 +24,7 @@ Author: Bjoern Wachter, bjoern.wachter@gmail.com
 #endif
 
 
-void impara_solvert::set_polarity(literalt lit, bool val)
+void impara_solver_smt2t::set_polarity(literalt lit, bool val)
 {
 #ifndef SMT2
 //  satcheck.set_polarity(lit, val);
@@ -33,7 +33,7 @@ void impara_solvert::set_polarity(literalt lit, bool val)
 
 /*******************************************************************\
 
-Function: impara_solvert::set_to_context
+Function: impara_solver_smt2t::set_to_context
 
   Inputs:
 
@@ -44,23 +44,17 @@ Function: impara_solvert::set_to_context
 \*******************************************************************/ 
  
  
-void impara_solvert::set_to_context(contextt context, const exprt &expr, bool val)
+void impara_solver_smt2t::set_to_context(contextt context, const exprt &expr, bool val)
 {
   const exprt &tmp=val ? expr : not_exprt(expr);
 
   literalt lit=(*this)(tmp);
-#ifndef SMT2
-  if(false /* satcheck.is_eliminated(lit)*/)
-  {
-    lit=const_literal(satcheck.l_get(lit).is_true());
-  }
-#endif
   (*this) << or_exprt(literal_exprt(lit), literal_exprt(context));
 }
  
 /*******************************************************************\
 
-Function: impara_solvert::new_context
+Function: impara_solver_smt2t::new_context
 
   Inputs:
 
@@ -70,7 +64,7 @@ Function: impara_solvert::new_context
 
 \*******************************************************************/ 
 
-literalt impara_solvert::new_context()
+literalt impara_solver_smt2t::new_context()
 {
   literalt activation_literal = convert(
       symbol_exprt("context::\\act$"+
@@ -82,30 +76,7 @@ literalt impara_solvert::new_context()
   return !activation_literal;
 }
   
-/*******************************************************************\
-
-Function: impara_historyt::set_context
-
-  Inputs:
-
- Outputs:
-
- Purpose:
-
-\*******************************************************************/  
   
-void impara_solvert::set_context(bool val)
-{
-  assert(!activation_literals.empty());
-  literalt activation_literal = activation_literals.back();
-  activation_literals.pop_back();
-#ifndef SMT2
-  bv_pointerst::set_to(literal_exprt(activation_literal), val);
-#else
-  smt2_dect::set_to(literal_exprt(activation_literal), val);
-#endif
 
-  set_assumptions(activation_literals);
-}
 
 

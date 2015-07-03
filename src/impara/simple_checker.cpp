@@ -41,9 +41,11 @@ Function: simple_checkert::set_hidden
 
 
 
-decision_proceduret::resultt simple_checkert::operator()(const exprt& start, const exprt& cond) 
+decision_proceduret::resultt 
+simple_checkert::operator()(const exprt& start, const exprt& cond) 
 {
-  decision_proceduret::resultt result=decision_proceduret::D_ERROR;
+  decision_proceduret::resultt 
+    result=decision_proceduret::D_ERROR;
 
   find_symbols(start,depends);
   find_symbols(cond,depends);

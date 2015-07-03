@@ -76,12 +76,13 @@ decision_proceduret::resultt wp_interpolatort::operator()
 
     if(node_ref->has_label())
     {
-
       impara_solvert solver(ns);
       
       solver.set_to(label, false);
-      
-      if(solver.dec_solve()==decision_proceduret::D_UNSATISFIABLE)
+     
+      literalt lit(solver(label));
+     
+      if(lit.is_false())
       {
         label=true_exprt();
       }      

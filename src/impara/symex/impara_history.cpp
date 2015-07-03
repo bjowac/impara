@@ -379,38 +379,23 @@ void impara_step_reft::convert(class prop_convt &dest,
 
 
 void impara_step_reft::get_core_steps(class prop_convt &dest, 
-            node_reft ancestor,
-            std::vector<literalt>& literals)
+            std::vector<literalt>& literals,
+            std::vector<impara_step_reft>& steps)
 {
 
-  unsigned guard_nr=0;
+  unsigned nr=0;
 
-  bool reached_ancestor=false;
-
-  for(impara_step_reft h(*this); !h.is_nil();--h)
+  for(impara_step_reft step : steps)
   {
-    impara_stept &step=*h;
-    
-    reached_ancestor=reached_ancestor||step.node_ref==ancestor;
-
-    if(reached_ancestor && step.node_ref!=ancestor) return;
-
-    if(step.is_hidden()) continue; 
-
-    const exprt& guard = step.guard;    
-    
-	  if(guard.is_nil() 
-       || guard.is_true()) 
-      continue;
-    
-    const literalt& literal=literals[guard_nr++];
+    const literalt& literal=literals[nr];
 
     if(  literal.is_constant() 
 	    || !dest.is_in_conflict(literal)
 	    )
     {
-      step.set_hidden();
+      step->set_hidden();
     } 
+    ++nr;
   }
 }
 
@@ -427,15 +412,19 @@ Function: impara_historyt::convert
 
 \*******************************************************************/
 
-void impara_step_reft::convert(class prop_convt &dest, 
+void impara_step_reft::convert(
+            class prop_convt &dest, 
             node_reft ancestor,
             propagationt &propagation,
             std::vector<literalt>& literals,
-            std::vector<exprt>& guards)
+            std::vector<exprt>& lazy,
+            std::vector<impara_step_reft> &steps)
 {
   bool reached_ancestor=false;
 
   int i=0; // counter for debugging purposes
+
+  std::vector<exprt> eager;
 
   for(impara_step_reft h(*this); !h.is_nil();--h)
   {
@@ -463,13 +452,16 @@ void impara_step_reft::convert(class prop_convt &dest,
 
     try {
 
-      if(guard.is_not_nil() &&
-         !guard.is_true())
-      {
-        exprt prop_guard=propagation(guard);
+      exprt prop_guard=propagation(guard);
 
+      if(prop_guard.is_not_nil() &&
+         !prop_guard.is_true())
+      {
         literals.push_back(dest(prop_guard));
-        guards.push_back(prop_guard);
+        if(!literals.back().is_constant())
+          dest.set_frozen(literals.back());
+        lazy.push_back(prop_guard);
+        steps.push_back(h);
       }
     }
     catch (std::string &s)
@@ -489,7 +481,25 @@ void impara_step_reft::convert(class prop_convt &dest,
     {
       if(full_lhs.is_not_nil())
       {
-        dest.set_to(equal_exprt(lhs, rhs.is_nil() ? lhs : propagation(rhs)), true);
+        exprt equality=equal_exprt(lhs, rhs.is_nil() ? lhs : propagation(rhs));
+
+        find_symbols_sett symbols;
+        find_symbols(rhs, symbols);
+
+      
+        if(full_lhs.type().has_subtype()
+           && symbols.size()>0)
+        {
+          literals.push_back(dest(equality));
+          if(!literals.back().is_constant())
+            dest.set_frozen(literals.back());
+          lazy.push_back(equality);
+          steps.push_back(h);
+        }
+        else
+        { 
+          eager.push_back(equality);
+        }
       }
 
     }
@@ -506,6 +516,9 @@ void impara_step_reft::convert(class prop_convt &dest,
     }
 
   }
+  
+  for(const exprt &expr : eager)
+    dest.set_to_true(expr);
 }
 
 

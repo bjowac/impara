@@ -338,7 +338,7 @@ void nodest::dot_output(std::ostream& out, std::set<unsigned>& visible)
      
       out << "\\n"+node.dc.pretty();
 
-      out << "];"<<std::endl;
+      out << "\"];"<<std::endl;
    
     }
   }

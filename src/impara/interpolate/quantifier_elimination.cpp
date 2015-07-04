@@ -340,9 +340,8 @@ exprt semantic_elimination(
     #endif
    
     literalt instance_literal(solver(instance));
-   
-    if(!instance_literal.is_constant() && !solver.is_eliminated(instance_literal))
-      {} // solver.set_to_true(literal_instance(exprt_literal));
+  
+    solver.set_to_true(instance);
     impara_conjoin(instance, dest, ns);
 
     ++counter;

@@ -76,17 +76,6 @@ decision_proceduret::resultt wp_interpolatort::operator()
 
     if(node_ref->has_label())
     {
-      impara_solvert solver(ns);
-      
-      solver.set_to(label, false);
-     
-      literalt lit(solver(label));
-     
-      if(lit.is_false())
-      {
-        label=true_exprt();
-      }      
-
       itp_map[node_ref]=label; 
     }
   }

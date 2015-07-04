@@ -382,20 +382,14 @@ void impara_step_reft::get_core_steps(class prop_convt &dest,
             std::vector<literalt>& literals,
             std::vector<impara_step_reft>& steps)
 {
-
-  unsigned nr=0;
-
-  for(impara_step_reft step : steps)
+  for(unsigned i=0; i<steps.size(); ++i)
   {
-    const literalt& literal=literals[nr];
+    const literalt& literal=literals[i];
 
-    if(  literal.is_constant() 
-	    || !dest.is_in_conflict(literal)
-	    )
+    if(!dest.is_in_conflict(literal))
     {
-      step->set_hidden();
+      steps[i]->set_hidden();
     } 
-    ++nr;
   }
 }
 
@@ -454,8 +448,8 @@ void impara_step_reft::convert(
 
       exprt prop_guard=propagation(guard);
 
-      if(prop_guard.is_not_nil() &&
-         !prop_guard.is_true())
+      if(guard.is_not_nil() &&
+         !guard.is_true())
       {
         literals.push_back(dest(prop_guard));
         if(!literals.back().is_constant())
@@ -519,6 +513,9 @@ void impara_step_reft::convert(
   
   for(const exprt &expr : eager)
     dest.set_to_true(expr);
+
+  assert(steps.size()==lazy.size());
+  assert(lazy.size()==literals.size());
 }
 
 

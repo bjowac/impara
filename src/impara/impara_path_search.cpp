@@ -654,8 +654,10 @@ int impara_path_searcht::decide_branch(statet& state)
       result=1;
     else if(guard.is_nil())
       result=-1;
-    else
-    if(refine(state, 
+    
+    
+    if(
+      refine(state, 
            initial_node_ref,
            true_exprt(), 
            not_exprt(guard), 
@@ -663,7 +665,8 @@ int impara_path_searcht::decide_branch(statet& state)
     {     
       result=0;
     }
-    else if(refine(state, 
+    else if(
+      refine(state, 
            initial_node_ref,
            true_exprt(), 
            guard, 

@@ -275,13 +275,13 @@ bool impara_path_searcht::path_check(
   }
   
   
-  impara_solvert solver(ns);
-  
 
   std::vector<literalt> guard_literals;
   std::vector<exprt> guards;
   std::vector<impara_step_reft> steps;
 
+  impara_solvert solver(ns);
+  
   history.convert(solver,
     ancestor,
     simple_checker.propagation,
@@ -313,7 +313,7 @@ bool impara_path_searcht::path_check(
       exprt eval_guard=solver.get(guards[i]);
  
       // guard excludes model
-      if(!eval_guard.is_true()) 
+      if(eval_guard.is_false()) 
       {
         guard_contexts[i]=solver.new_context();      
         guard_added=true;
@@ -508,10 +508,10 @@ bool impara_path_searcht::interpolate(
   wp_interpolatort wpi(ns, options);
   wpi(history, node_ref, ancestor, assumption, conclusion, itp_map);
 
-  for(interpolatort::interpolant_mapt::iterator
-      m_it=itp_map.begin();
-      m_it!=itp_map.end();
-      m_it++)
+  for(interpolatort::interpolant_mapt::reverse_iterator
+      m_it=itp_map.rbegin();
+      m_it!=itp_map.rend();
+      ++m_it)
   {
 
     node_reft node_ref=m_it->first;

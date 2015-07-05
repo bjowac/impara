@@ -63,6 +63,7 @@ safety_checkert::resultt impara_path_searcht::operator () (
 
   all_properties=options.get_bool_option("all-properties");
   do_show_vcc = options.get_bool_option("show-vcc"); 
+  do_wordlevel_interpolation=options.get_bool_option("wordlevel-interpolation");
 
   #ifdef DEBUG
 

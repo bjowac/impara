@@ -396,6 +396,16 @@ void impara_parse_optionst::get_command_line_options(optionst &options)
     options.set_option("unwind-limit", 
       std::numeric_limits<int>::max());
 
+  if(cmdline.isset("wordlevel-interpolation"))
+  {
+    options.set_option("wordlevel-interpolation", true);
+  }
+  else
+  {
+    options.set_option("wordlevel-interpolation", false);
+  }
+
+
   if(cmdline.isset("graphml-cex"))
   {
     options.set_option("graphml-cex", cmdline.get_value("graphml-cex"));
@@ -1015,6 +1025,7 @@ void impara_parse_optionst::help()
     " --force-limit                restrict force cover to at most <n> nodes (default 2)\n"
     " --no-POR                     switch off partial-order reduction\n"
     " --context-bound              limit number of context switches\n"
+    " --word-level-interpolation   use wordlevel interpolation\n"
     "\n" 
     "Backend options:\n"
     " --beautify-greedy            beautify the counterexample (greedy heuristic)\n"

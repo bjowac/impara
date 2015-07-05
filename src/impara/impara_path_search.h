@@ -46,6 +46,7 @@ public:
     do_simplify    (true),
     do_bfs         (false),
     do_check_proof (false),	
+    do_wordlevel_interpolation(false),
     do_graphml_cex (false),
     do_show_vcc    (false),
     thread_limit   (std::numeric_limits<int>::max()),
@@ -88,6 +89,7 @@ protected:
        do_simplify,
        do_bfs,
        do_check_proof,
+       do_wordlevel_interpolation,
        do_graphml_cex;
   
   bool do_show_vcc;

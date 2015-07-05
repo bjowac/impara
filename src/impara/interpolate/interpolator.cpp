@@ -16,10 +16,15 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include "symex/from_ssa.h"
 
+
+#include "wordlevel_interpolator.h"
+
 #include "step_wp.h"
 #include "interpolator.h"
 
 //#define DEBUG
+
+
 
 #ifdef DEBUG
 #include <iostream>
@@ -48,9 +53,80 @@ decision_proceduret::resultt wp_interpolatort::operator()
     interpolatort::interpolant_mapt& itp_map
 )
 {
-  exprt wp=cond;
+
 
   bool reached_ancestor=false;
+
+  if(do_wordlevel)
+  {
+    transitivity_interpolatort interpolator(ns);
+
+    node_reft current=history->node_ref;
+
+    for(impara_step_reft h(history); !h.is_nil() && !reached_ancestor; --h)
+    {
+
+      const impara_stept &step=*h;
+
+      node_ref=step.node_ref;
+
+
+
+      reached_ancestor=reached_ancestor||node_ref==ancestor;
+
+      if(step.guard.is_not_nil() && !step.is_hidden())
+        interpolator.add_formula(step.guard, current->number);
+        
+      if(step.full_lhs.is_not_nil())
+      {
+        exprt equal=equal_exprt(step.ssa_lhs, step.ssa_rhs);
+      
+        interpolator.add_formula(equal, current->number);
+      }
+      
+      if(node_ref->has_label())
+      {
+        current=node_ref;
+      }
+    }
+    
+    decision_proceduret::resultt 
+      interpolator_result=interpolator.infer();
+    
+    if (interpolator_result==decision_proceduret::D_UNSATISFIABLE)
+    {
+    
+      reached_ancestor=false;
+
+      for(impara_step_reft h(history); !h.is_nil() && !reached_ancestor; --h)
+      {
+
+        const impara_stept &step=*h;
+
+        node_ref=step.node_ref;
+
+        reached_ancestor=reached_ancestor||node_ref==ancestor;
+
+        exprt interpol;
+
+        interpolator.get_interpolant(step.node_ref->number, interpol);
+
+
+        if(node_ref->has_label())
+        {
+          itp_map[node_ref]=interpol; 
+        }
+      }
+      
+      return interpolator_result; 
+    }
+  }
+
+  // weakest preconditions
+  
+  exprt wp=cond;
+
+  reached_ancestor=false;
 
   bool forall_itp=options.get_bool_option("forall-itp");
 
@@ -79,6 +155,7 @@ decision_proceduret::resultt wp_interpolatort::operator()
       itp_map[node_ref]=label; 
     }
   }
+
 
   return decision_proceduret::D_UNSATISFIABLE;
 }

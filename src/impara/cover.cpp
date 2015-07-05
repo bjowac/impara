@@ -505,7 +505,7 @@ bool impara_path_searcht::interpolate(
 
   interpolatort::interpolant_mapt itp_map;
 
-  wp_interpolatort wpi(ns, options);
+  wp_interpolatort wpi(ns, options, do_wordlevel_interpolation);
   wpi(history, node_ref, ancestor, assumption, conclusion, itp_map);
 
   for(interpolatort::interpolant_mapt::reverse_iterator

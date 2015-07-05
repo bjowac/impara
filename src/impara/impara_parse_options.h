@@ -28,7 +28,7 @@ Author: Daniel Kroening, kroening@kroening.com
   "D:I:(node-limit):" \
   "(slice)(eager)"\
   "(xml-ui)(xml-interface)(vcd):" \
-  "(interpol):(forall-itp)"\
+  "(wordlevel-interpolation)(forall-itp)"\
   "(cvc)(smt1)(smt2)(boolector)(yices)(z3)(opensmt)" \
   "(show-loops)(show-vcc)(no-simplify)(no-cover)"\
   "(simple-force)(no-force)(force-limit):(cover-limit):"\

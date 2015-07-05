@@ -60,8 +60,10 @@ public:
 
   wp_interpolatort(
     const namespacet& _ns,    
-    const optionst& _options):
-    interpolatort(_ns,_options)
+    const optionst& _options,
+    bool _do_wordlevel):
+    interpolatort(_ns,_options),
+    do_wordlevel(_do_wordlevel)
   {
   }
 
@@ -73,6 +75,8 @@ public:
     const exprt& start,
     const exprt& cond,
     interpolant_mapt&);
+    
+  bool do_wordlevel;  
 };
 
 //

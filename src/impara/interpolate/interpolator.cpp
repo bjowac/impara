@@ -111,9 +111,9 @@ decision_proceduret::resultt wp_interpolatort::operator()
 
         interpolator.get_interpolant(step.node_ref->number, interpol);
 
-
         if(node_ref->has_label())
         {
+          simplify_expr(interpol, ns);
           itp_map[node_ref]=interpol; 
         }
       }

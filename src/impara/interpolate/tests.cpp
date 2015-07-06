@@ -1,17 +1,20 @@
-#ifdef TEST_WORDLEVEL_INTERPOLATOR
+#include <iostream>
 
-#include <namespace.h>
-#include <language_util.h>
-#include <mp_arith.h>
-#include <arith_tools.h>
-#include <rational_tools.h>
+#include <util/symbol_table.h>
+#include <util/namespace.h>
+#include <langapi/language_util.h>
+#include <util/mp_arith.h>
+#include <util/arith_tools.h>
+#include <util/rational_tools.h>
 
-#include <std_expr.h>
-#include <std_types.h>
+#include <util/std_expr.h>
+#include <util/std_types.h>
 
 #include <langapi/mode.h>
 
 #include <ansi-c/ansi_c_language.h>
+
+#include "wordlevel_interpolator.h"
 
 void test0()
 {
@@ -48,7 +51,7 @@ void test0()
   // partition 3
   e5.copy_to_operands(e, sum); // e = d+1
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -61,11 +64,17 @@ void test0()
   a1.copy_to_operands(e3, e4);
 
 
-  el.push_back(a0);
-  el.push_back(a1);
-  el.push_back(e5);
+  interpolator.add_formula(a1, 1);
+  interpolator.add_formula(e5, 2);
 
-  interpolator.add_formulas(el);
+#if 0
+  interpolator.add_formula(a0, 0);
+#else
+  interpolator.add_formula(e0, 0);
+  interpolator.add_formula(e1, 0);
+  interpolator.add_formula(e2, 0);
+#endif
+
 
   expr_listt interpolants;
 
@@ -75,7 +84,7 @@ void test0()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -86,6 +95,8 @@ void test0()
   else
     std::cout << "Failed to interpolate." << std::endl;
 }
+
+
 
 void test1()
 {
@@ -108,7 +119,7 @@ void test1()
   e1.copy_to_operands(a, c4); e1.make_not(); // a != 4
   e2.copy_to_operands(a, c5); // a == 5
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -118,10 +129,8 @@ void test1()
   a0.copy_to_operands(e1, e2);
 
 
-  el.push_back(e0);
-  el.push_back(a0);
-
-  interpolator.add_formulas(el);
+  interpolator.add_formula(e0,0);
+  interpolator.add_formula(a0,1);
 
   expr_listt interpolants;
 
@@ -131,7 +140,7 @@ void test1()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -142,6 +151,8 @@ void test1()
   else
     std::cout << "Failed to interpolate." << std::endl;
 }
+
+
 
 void test2()
 {
@@ -167,14 +178,13 @@ void test2()
 
   expr_listt el;
 
-  el.push_back(a0);
-  el.push_back(e2);
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
-  interpolator.add_formulas(el);
+  interpolator.add_formula(a0, 0);
+  interpolator.add_formula(e2, 1);
 
   std::cout << "Expecting false (i.e., a!=a,  0>=1)" << std::endl;
 
@@ -184,7 +194,7 @@ void test2()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -195,6 +205,8 @@ void test2()
   else
     std::cout << "Failed to interpolate." << std::endl;
 }
+
+#if 0
 
 void test3()
 {
@@ -211,7 +223,7 @@ void test3()
   e0.copy_to_operands(a, a); // a == a
   e0.negate();
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -226,7 +238,7 @@ void test3()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -263,7 +275,7 @@ void test4()
   // partition 2
   e2.copy_to_operands(b, c0); // s1 = 0
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -285,7 +297,7 @@ void test4()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -328,7 +340,7 @@ void test5()
   e2.copy_to_operands(b, c0); // b = 0
   e3.copy_to_operands(c, c1); // c = 1
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -353,7 +365,7 @@ void test5()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -401,7 +413,7 @@ void test6()
   e4.copy_to_operands(c, e); // c = e
   e5.copy_to_operands(b, c2); // b = 2
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -427,7 +439,7 @@ void test6()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -470,7 +482,7 @@ void test7()
   e2.copy_to_operands(x, c0); // x = 0
   e2.negate(); // x != 0
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -496,7 +508,7 @@ void test7()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -542,7 +554,7 @@ void test8()
   e3.copy_to_operands(x, c0); // x = 0
   e3.negate(); // x != 0
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -565,7 +577,7 @@ void test8()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -590,7 +602,7 @@ void test9()
   el.push_back(e0);
   el.push_back(e1);
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -604,7 +616,7 @@ void test9()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -629,7 +641,7 @@ void test10()
   el.push_back(e0);
   el.push_back(e1);
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -643,7 +655,7 @@ void test10()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -684,7 +696,7 @@ void test11()
 
   e3.copy_to_operands(i1, c5);
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -705,7 +717,7 @@ void test11()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -740,7 +752,7 @@ void test12()
 
   e2.copy_to_operands(x, y);
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -760,7 +772,7 @@ void test12()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -797,7 +809,7 @@ void test13()
   e3.copy_to_operands(y, z);
   e2.negate();
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -821,7 +833,7 @@ void test13()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -854,7 +866,7 @@ void test14()
   e2.copy_to_operands(i, c5);
   e2.negate();
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -876,7 +888,7 @@ void test14()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -923,7 +935,7 @@ void test15()
   e3.copy_to_operands(c, c5); 
   e3.negate(); // !(s2 < 5)
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -945,7 +957,7 @@ void test15()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -999,7 +1011,7 @@ void test16()
   e4.copy_to_operands(d, c5); 
   e4.negate(); // !(s3 < 5)
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -1021,7 +1033,7 @@ void test16()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
 
     expr_listt::const_iterator e_it=interpolants.begin();
@@ -1087,7 +1099,7 @@ void test17()
 
   exprt e5=e; // same_run2
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -1111,7 +1123,7 @@ void test17()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
 
     expr_listt::const_iterator e_it=interpolants.begin();
@@ -1160,7 +1172,7 @@ void test18()
   e3.copy_to_operands(d, sum); // d = a+c
   e4.copy_to_operands(d, c5); // d > 5
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -1182,7 +1194,7 @@ void test18()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -1216,7 +1228,7 @@ void test19()
   exprt c14=from_integer(14, unsignedbv_typet(32));
   e1.copy_to_operands(tc, c14);
 
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -1231,7 +1243,7 @@ void test19()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -1272,7 +1284,7 @@ void test20()
   zatc.op()=zaddr;
   e2.copy_to_operands(y, zatc);
   
-  contextt ctx;
+  symbol_tablet ctx;
   namespacet ns(ctx);
   transitivity_interpolatort interpolator(ns);
 
@@ -1288,7 +1300,7 @@ void test20()
   {
     interpolator.get_interpolants(interpolants);
       
-    contextt ctx;
+    symbol_tablet ctx;
     namespacet ns(ctx);
     for (expr_listt::const_iterator e_it=interpolants.begin();
          e_it!=interpolants.end(); e_it++)
@@ -1300,16 +1312,24 @@ void test20()
     std::cout << "Failed to interpolate." << std::endl;
 }
 
+#endif
+
 int main(int argc, char** argv)
 {
   register_language(new_ansi_c_language);
 
   test0();
   std::cout << "==========" << std::endl;
+
+
   test1();
   std::cout << "==========" << std::endl; 
+
+
   test2();
   std::cout << "==========" << std::endl; 
+
+#if 0
   test3(); 
   std::cout << "==========" << std::endl;  
   test4();
@@ -1346,6 +1366,7 @@ int main(int argc, char** argv)
   std::cout << "==========" << std::endl;     
   test20();
   std::cout << "==========" << std::endl;     
+#endif
+
 }
 
-#endif

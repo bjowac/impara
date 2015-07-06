@@ -84,7 +84,7 @@ public:
   
   virtual void set_polarity(literalt lit, bool val)
   {
-    satcheck.set_polarity(lit, val);
+    //satcheck.set_polarity(lit, val);
   }
  
   T satcheck;

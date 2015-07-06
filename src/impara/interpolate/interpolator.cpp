@@ -59,36 +59,93 @@ decision_proceduret::resultt wp_interpolatort::operator()
 
   if(do_wordlevel)
   {
-    transitivity_interpolatort interpolator(ns);
-
-    node_reft current=history->node_ref;
+    std::set<unsigned> seen;
+    std::map<unsigned, unsigned> partition;
+    unsigned partitions=1;
 
     for(impara_step_reft h(history); !h.is_nil() && !reached_ancestor; --h)
     {
 
       const impara_stept &step=*h;
 
-      node_ref=step.node_ref;
+      if(step.node_ref->has_label())
+      {
+        if(seen.count(step.node_ref->number)==0)
+        {
+          ++partitions;
+          seen.insert(step.node_ref->number); 
+        }
+      }
+      
+      reached_ancestor=reached_ancestor||step.node_ref==ancestor;
+    }
 
+    partition[ancestor->number]=0;
+    partition[node_ref->number]=partitions;
 
+    reached_ancestor=false;
 
-      reached_ancestor=reached_ancestor||node_ref==ancestor;
+    for(impara_step_reft h(history); !h.is_nil() && !reached_ancestor; --h)
+    {
+
+      const impara_stept &step=*h;
+
+      if(step.node_ref->has_label())
+      {
+        if(partition.find(step.node_ref->number)==partition.end())
+          partition[step.node_ref->number]=--partitions;
+      }
+      
+      reached_ancestor=reached_ancestor||step.node_ref==ancestor;
+    }
+ 
+    transitivity_interpolatort interpolator(ns);
+
+    node_reft current=node_ref;
+
+    interpolator.add_formula(start, 0);
+    interpolator.add_formula(not_exprt(cond), partitions);    
+    
+    std::cout << "(VCC) " << partition[current->number] 
+      << " " << from_expr(ns, "", not_exprt(cond)) << std::endl;
+
+    reached_ancestor=false;
+
+    for(impara_step_reft h(history); !h.is_nil() && !reached_ancestor; --h)
+    {
+
+      const impara_stept &step=*h;
+
+      if(step.node_ref->has_label())
+      {
+        current=step.node_ref;
+      }
+
+      reached_ancestor=reached_ancestor||step.node_ref==ancestor;
 
       if(step.guard.is_not_nil() && !step.is_hidden())
-        interpolator.add_formula(step.guard, current->number);
+      {
+        std::cout << "(G) " << partition[current->number] << " " << from_expr(ns, "", step.guard) << std::endl;
+        interpolator.add_formula(step.guard, partition[current->number]);
+      } 
         
       if(step.full_lhs.is_not_nil())
       {
-        exprt equal=equal_exprt(step.ssa_lhs, step.ssa_rhs);
       
-        interpolator.add_formula(equal, current->number);
-      }
+        if(step.ssa_rhs.is_not_nil())
+        {
       
-      if(node_ref->has_label())
-      {
-        current=node_ref;
+          exprt equal=equal_exprt(step.ssa_lhs, step.ssa_rhs);
+      
+          std::cout << "(E) " << partition[current->number] << " " << from_expr(ns, "", equal) << std::endl;
+      
+          interpolator.add_formula(equal, partition[current->number]);
+        }
       }
     }
+
+    std::cout << "(A) " << partition[ancestor->number] << " " << from_expr(ns, "", start) << std::endl;
+
     
     decision_proceduret::resultt 
       interpolator_result=interpolator.infer();
@@ -103,17 +160,18 @@ decision_proceduret::resultt wp_interpolatort::operator()
 
         const impara_stept &step=*h;
 
-        node_ref=step.node_ref;
-
-        reached_ancestor=reached_ancestor||node_ref==ancestor;
+        reached_ancestor=reached_ancestor||step.node_ref==ancestor;
 
         exprt interpol;
 
-        interpolator.get_interpolant(step.node_ref->number, interpol);
+        interpolator.get_interpolant(partition[step.node_ref->number], interpol);
 
-        if(node_ref->has_label())
+        if(step.node_ref->has_label())
         {
           simplify_expr(interpol, ns);
+          
+          std::cout << "Interpolant " << partition[step.node_ref->number] << " : " << from_expr(ns, "", interpol) << std::endl;
+          
           itp_map[node_ref]=interpol; 
         }
       }

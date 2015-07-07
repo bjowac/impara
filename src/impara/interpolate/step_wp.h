@@ -15,7 +15,6 @@ Author: Daniel Kroening, kroening@kroening.com
 exprt step_wp(
   const impara_stept &,
   const exprt &,
-  bool quantified,
   const namespacet &
 );
   

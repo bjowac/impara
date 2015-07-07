@@ -170,8 +170,6 @@ decision_proceduret::resultt wp_interpolatort::operator()
   
   exprt wp=cond;
 
-  bool forall_itp=options.get_bool_option("forall-itp");
-
   itp_map[node_ref]=from_ssa(wp);
 
   for(impara_step_reft h(history); !h.is_nil() && h->node_ref!=ancestor; --h)
@@ -180,7 +178,7 @@ decision_proceduret::resultt wp_interpolatort::operator()
 
     node_ref=step.node_ref;
    
-    wp=step_wp(step, wp, forall_itp, ns);
+    wp=step_wp(step, wp, ns);
 
     exprt label=from_ssa(wp);
 

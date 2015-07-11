@@ -288,9 +288,6 @@ const exprt& strip_nested_casts(const exprt& expr)
 
 
 
-bool quantified=false;
-
-
 exprt original(const exprt &src)
 {
   if(src.id()==ID_symbol)
@@ -332,7 +329,6 @@ Function: step_wp
 exprt step_wp(
   const impara_stept &step,
   const exprt &cond,
-  bool quantified,
   const namespacet &ns)
 {
   exprt wp=cond;

@@ -78,12 +78,13 @@ decision_proceduret::resultt wp_interpolatort::operator()
     partition[ancestor->number]=0;
     partition[node_ref->number]=partitions+1;
 
-    transitivity_interpolatort interpolator(ns);
 
-    interpolator.set_maximal_partition(partitions);
+    
+    
+    std::vector<std::pair<exprt, unsigned> > formulas;
 
-    interpolator.add_formula(start, 0);
-    interpolator.add_formula(not_exprt(cond), partitions);    
+    formulas.push_back(std::make_pair(start, 0));
+    formulas.push_back(std::make_pair(not_exprt(cond), partitions));
 
     for(impara_step_reft h(history); !h.is_nil() && h->node_ref!=ancestor; --h)
     {
@@ -116,7 +117,7 @@ decision_proceduret::resultt wp_interpolatort::operator()
 
         simplify_expr(guard, ns);
 
-        interpolator.add_formula(guard, partition[step.node_ref->number]);
+        formulas.push_back(std::make_pair(guard, partition[step.node_ref->number]));
       } 
         
       if(step.full_lhs.is_not_nil())
@@ -129,16 +130,40 @@ decision_proceduret::resultt wp_interpolatort::operator()
       
           std::cout << "(E) " << partition[step.node_ref->number] << " " << from_expr(ns, "", equal) << std::endl;
       
-          interpolator.add_formula(equal, partition[step.node_ref->number]);
+          formulas.push_back(std::make_pair(equal, partition[step.node_ref->number]));
+          
         }
       }
     }
 
-    std::cout << "(A) " << partition[ancestor->number] << " " << from_expr(ns, "", start) << std::endl;
 
+    std::cout << "(A) " << partition[ancestor->number] << " " << from_expr(ns, "", start) << std::endl;
     
+    transitivity_interpolatort interpolator(ns);
+
+    for(std::vector<std::pair<exprt, unsigned> >::iterator
+        it=formulas.begin(); it!=formulas.end(); ++it)
+    {
+      interpolator.add_formula(it->first, it->second);
+    }
+
     decision_proceduret::resultt 
       interpolator_result=interpolator.infer();
+
+
+
+
+    expr_listt interpolants;
+
+    interpolator.get_interpolants(interpolants);
+      
+    for (expr_listt::const_iterator e_it=interpolants.begin();
+         e_it!=interpolants.end(); e_it++)
+    {
+      std::cout << from_expr(ns, "", *e_it) << std::endl;
+    }
+
+
     
     if (interpolator_result==decision_proceduret::D_UNSATISFIABLE)
     {

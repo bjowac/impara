@@ -397,7 +397,7 @@ struct row_templatet
 
 struct row_solvert
 {
-  typedef impara_solvert::contextt contextt;
+  typedef impara_solver_no_simplifiert::contextt contextt;
 
   const namespacet &ns;
 
@@ -416,7 +416,7 @@ struct row_solvert
 
 
   row_solvert(const namespacet &__ns,
-              impara_solvert    &__solver,
+              impara_solver_no_simplifiert    &__solver,
               row_templatet  &__row_template,
               unsigned _limit=1024)
   : ns(__ns),
@@ -668,7 +668,7 @@ struct row_solvert
     row_template.set_row_value(val, row, lower);
   }
 
-  impara_solvert &solver;
+  impara_solver_no_simplifiert &solver;
   row_templatet &row_template;
 
   unsigned nr_rows;
@@ -824,30 +824,6 @@ bool impara_path_searcht::strengthen(
 
   simple_checker.propagation.set_hidden(false);
 
-  std::cout << "R(";
-
-  for(replace_mapt::const_iterator it=vars.begin(); it!=vars.end(); ++it)
-  {
-    std::cout << from_expr(ns, "", it->first) << " " ; 
-  }
-
-  for(replace_mapt::const_iterator it=vars.begin(); it!=vars.end(); ++it)
-  {
-    std::cout << from_expr(ns, "", it->second) << " " ;
-  }
-
-  std::cout << ")" << std::endl;
-
-
-  poly_templatet poly_template(
-    input,
-    vars);
-    
-  std::cout << "Poly template " << from_expr(ns, "", poly_template.poly) << std::endl;
-
-
-  
-
 
   std::set<exprt> bounds;
 
@@ -872,29 +848,13 @@ bool impara_path_searcht::strengthen(
   }
   
    
-  impara_solvert solver(ns);
-
-  std::vector<literalt> guard_literals;
-  std::vector<exprt> guards;
-  std::vector<impara_step_reft> steps;
+  impara_solver_no_simplifiert solver(ns);
 
   state.history.convert(solver,
-    ancestor,
-    simple_checker.propagation,
-    guard_literals,
-    guards,
-    steps);
-
-  std::vector<impara_solvert::contextt> guard_contexts(guard_literals.size());
-
-  for(unsigned i=0; i<guard_literals.size(); ++i)
-  {
-    guard_contexts[i]=solver.new_context();
-    solver.set_to_context(guard_contexts[i], literal_exprt(guard_literals[i]), true);
-  }
+    ancestor);
 
   // initialise the solver for initialisation
-  impara_solvert init_solver(ns);
+  impara_solver_no_simplifiert init_solver(ns);
   {
     std::vector<literalt> guard_literals3;
     std::vector<exprt> guard_exprs;
@@ -905,7 +865,7 @@ bool impara_path_searcht::strengthen(
   }
 
   // initialising the solver for induction
-  impara_solvert templ_solver(ns);
+  impara_solver_no_simplifiert templ_solver(ns);
   {
 
     std::vector<literalt> guard_literals2;
@@ -939,7 +899,7 @@ bool impara_path_searcht::strengthen(
     
     // get initial abstraction
     {
-      impara_solvert::contextt context=init_solver.new_context();
+      impara_solver_no_simplifiert::contextt context=init_solver.new_context();
       row_solvert row_solver(ns, init_solver, row_temp);
     
       init_solver.set_to_context(context, assumption, true);
@@ -955,7 +915,7 @@ bool impara_path_searcht::strengthen(
     
     // compute fixpoint
     {
-      impara_solvert::contextt context=templ_solver.new_context();
+      impara_solver_no_simplifiert::contextt context=templ_solver.new_context();
       row_solvert row_solver(ns, templ_solver, row_temp);
     
       templ_solver.set_to_context(context, assumption, true);
@@ -1006,7 +966,7 @@ bool impara_path_searcht::strengthen(
       impara_conjoin(predicate, assumption, ns);
       impara_conjoin(predicate_post, conclusion, ns);
 
-      impara_solvert::contextt context=solver.new_context();
+      impara_solver_no_simplifiert::contextt context=solver.new_context();
 
       // start condition?
       solver.set_to_context(context, assumption, true);
@@ -1049,10 +1009,6 @@ bool impara_path_searcht::strengthen(
       else
       {
         std::cout << "Inductive at N" << ancestor->number << std::endl;
-        
-        state.history.get_core_steps(solver,
-                       guard_contexts,
-                       steps);      
 
         result=true;
         repeat=false;

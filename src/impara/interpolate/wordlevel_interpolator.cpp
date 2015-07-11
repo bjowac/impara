@@ -3893,7 +3893,7 @@ decision_proceduret::resultt
 expression_poolt::compare_constants(unsigned a, unsigned b)
 {
   if(a==b)
-    return decision_proceduret::D_SATISFIABLE;
+    return decision_proceduret::D_ERROR;
 
   mp_integer left_value;
   mp_integer right_value;
@@ -3917,7 +3917,7 @@ expression_poolt::compare_constants(unsigned a, unsigned b)
     return decision_proceduret::D_SATISFIABLE;
   
   if(left_value==right_value)
-    return decision_proceduret::D_SATISFIABLE;
+    return decision_proceduret::D_ERROR;
   else
     return decision_proceduret::D_UNSATISFIABLE;
 }

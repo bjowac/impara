@@ -511,8 +511,8 @@ void impara_step_reft::convert(
 
   }
   
-  for(const exprt &expr : eager)
-    dest.set_to_true(expr);
+  for(unsigned i=0; i<eager.size(); ++i)
+    dest.set_to_true(eager[i]);
 
   assert(steps.size()==lazy.size());
   assert(lazy.size()==literals.size());

@@ -571,7 +571,9 @@ int impara_parse_optionst::doit()
       
       convert(ns, impara_path_search.error_trace, graphml_cex);
       
-      std::ofstream graphml_file(options.get_option("graphml-cex"));
+      std::string filename=options.get_option("graphml-cex");
+      
+      std::ofstream graphml_file(filename.c_str());
       write_graphml(graphml_cex, graphml_file);
     }
     

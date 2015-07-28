@@ -37,7 +37,7 @@ Author: Daniel Kroening, kroening@kroening.com
   "(bounds-check)(div-by-zero-check)(pointer-check)" \
   "(signed-overflow-check)(unsigned-overflow-check)(nan-check)" \
   "(16)(32)(64)(LP64)(ILP64)(LLP64)(ILP32)(LP32)" \
-  "(svcomp)(graphml-cex):" \
+  "(graphml-cex):" \
   "(little-endian)(big-endian)" \
   "(show-properties)(property):" \
   "(show-locs)(show-goto-functions)(show-value-sets)" \

@@ -3,6 +3,7 @@
 Module: Unwound CFG Nodes
 
 Author: Daniel Kroening, kroening@kroening.com
+        Bjoern Wachter, bjoern.wachter@gmail.com
 
 \*******************************************************************/
 
@@ -68,10 +69,6 @@ class node_reft
   inline node_reft &operator--();
 
   node_reft nearest_common_ancestor(const node_reft other) const;
-
-  #ifdef IMPARA_BIDIR
-  void labeled_successors(std::vector<node_reft> &dest, unsigned thread) const;
-  #endif
 
   void leaves(std::vector<node_reft> &dest) const;
  

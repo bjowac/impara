@@ -74,13 +74,6 @@ inline void node_reft::generate_successor(
   node_container.resize(index+1);
   
   node_container.back().predecessor=old;
-
-  #ifdef IMPARA_BIDIR
-  if(!old.is_nil())
-  {
-    old->successors.push_back(*this);
-  }
-  #endif
 }
 
 

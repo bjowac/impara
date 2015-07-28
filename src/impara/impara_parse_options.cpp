@@ -415,12 +415,6 @@ void impara_parse_optionst::get_command_line_options(optionst &options)
   {
     options.set_option("do-graphml-cex", false);
   }
-
-  if(cmdline.isset("svcomp"))
-  {
-    options.set_option("error-label", "ERROR");
-    options.set_option("eager", true);
-  }
 }
 
 /*******************************************************************\

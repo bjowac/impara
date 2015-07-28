@@ -3,6 +3,7 @@
 Module: Unwound CFG Nodes
 
 Author: Daniel Kroening, kroening@kroening.com
+        Bjoern Wachter, bjoern.wachter@gmail.com
 
 \*******************************************************************/
 

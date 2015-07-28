@@ -302,8 +302,6 @@ void statet::record_assume(const exprt &guard)
   }
 
   step.set_assume();
-  //merge ireps
-  merge(step.guard);
 }
 
 
@@ -331,7 +329,7 @@ void statet::record_assert(const exprt &guard)
   step.guard=guard;
   
   // merge ireps
-  merge(step.ssa_rhs);
+  merge(step.guard);
 }
 
 /*******************************************************************\
@@ -429,7 +427,7 @@ void statet::record_goto(
   impara_stept &step=*history;
 
   step.guard=guard;
-
+  merge(step.guard);
   step.set_branch(taken);
 }
 

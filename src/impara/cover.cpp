@@ -1,8 +1,9 @@
 /*******************************************************************\
 
-Module: Forward Path Search
+Module: Cover checks
 
 Author: Daniel Kroening, kroening@kroening.com
+        Bjoern Wachter, bjoern.wachter@gmail.com
 
 \*******************************************************************/
 
@@ -245,20 +246,19 @@ bool impara_path_searcht::path_check(
     {
       case decision_proceduret::D_UNSATISFIABLE:
         if(do_show_vcc)
-          std::cout << "Simple checker: UNSATISFIABLE" << std::endl;
-      
+          status() << "Simple checker: UNSATISFIABLE" << eom;
         return true;
         break;
       case decision_proceduret::D_SATISFIABLE:
         if(do_show_vcc)
-          std::cout << "Simple checker: UNSATISFIABLE" << std::endl;
+          status() << "Simple checker: UNSATISFIABLE" << eom;
 
         if(!build_trace && !(loop && do_strengthen))
           return false;
       break; 
       default:
         if(do_show_vcc)
-          std::cout << "Simple checker: INCONCLUSIVE" << std::endl;
+          status() << "Simple checker: INCONCLUSIVE" << eom;
         break;
     }
   }

@@ -3,6 +3,7 @@
 Module: State of path-based symbolic simulator
 
 Author: Daniel Kroening, kroening@kroening.com
+        Bjoern Wachter, bjoern.wachter@gmail.com
 
 \*******************************************************************/
 
@@ -74,15 +75,15 @@ exprt statet::read(const exprt &src, bool propagate)
   // we force propagation for dereferencing
   exprt tmp3=dereference_rec(tmp2, true);
 
-	#ifdef DEBUG
-	std::cout << "   == deref ==> " << from_expr(var_map.ns, "", tmp3) << std::endl;
-	#endif
+#ifdef DEBUG
+  std::cout << "   == deref ==> " << from_expr(var_map.ns, "", tmp3) << std::endl;
+#endif
 
   exprt tmp4=instantiate_rec(tmp3, propagate);
 
-	#ifdef DEBUG
-	std::cout << "   == instantiate ==> " << from_expr(var_map.ns, "", tmp3) << std::endl;
-	#endif
+#ifdef DEBUG
+  std::cout << "   == instantiate ==> " << from_expr(var_map.ns, "", tmp3) << std::endl;
+#endif
   
   exprt tmp5=  simplify_pointer_checks(tmp4);
   
@@ -361,8 +362,7 @@ struct address_dividert
           
         }
 
-	      return nil_exprt();
-
+	return nil_exprt();
       }
     }
 
@@ -491,7 +491,8 @@ exprt statet::instantiate_rec(
       return symbol_exprt(id, src.type());
     }
     else
-      throw "instantiate_rec: unexpected side effect "+id2string(statement);
+      throw "instantiate_rec: unexpected side effect "
+        + from_expr(var_map.ns, "", src);
   }
   else if(src.id()==ID_dereference)
   {
@@ -559,7 +560,8 @@ exprt statet::instantiate_rec(
       return symbol_exprt(id, src.type());
     }
     else
-      throw "instantiate_rec: unexpected side effect "+id2string(statement);
+      throw "instantiate_rec: unexpected side effect "
+      + from_expr(var_map.ns, "", src);
   }
   else if(src.id()==ID_index)
   {
@@ -817,32 +819,32 @@ exprt statet::dereference_rec(
   {  
     const dereference_exprt &dereference_expr=to_dereference_expr(src);
 
-		exprt address=dereference_expr.pointer();
+    exprt address=dereference_expr.pointer();
 
     exprt address_dereferenced;
 
     try {
 
-	    if(address.id()==ID_plus)
-	    {
-		    address.op0()=read(address.op0(), propagate);
-		    address.op0()=::dereference(address.op0(), var_map.ns);
-		    if(address.op0().id()==ID_index)
-		    {
-		      const exprt &base=address.op0().op0();
-		      const exprt &index=address.op0().op1();
-		      address_dereferenced=index_exprt(base, plus_exprt(index, address.op1()));
-		    }
-		    else
-		    {
-		      address_dereferenced=::dereference(dereference_expr.pointer(), var_map.ns);
-		    }
-	    }
-	    else
-	    {
-		    address=read(dereference_expr.pointer(), propagate);
-		    address_dereferenced=::dereference(address, var_map.ns);
-	    }
+      if(address.id()==ID_plus)
+      {
+        address.op0()=read(address.op0(), propagate);
+        address.op0()=::dereference(address.op0(), var_map.ns);
+        if(address.op0().id()==ID_index)
+        {
+	  const exprt &base=address.op0().op0();
+	  const exprt &index=address.op0().op1();
+	  address_dereferenced=index_exprt(base, plus_exprt(index, address.op1()));
+        }
+        else
+        {
+          address_dereferenced=::dereference(dereference_expr.pointer(), var_map.ns);
+        }
+      }
+      else
+      {
+        address=read(dereference_expr.pointer(), propagate);
+        address_dereferenced=::dereference(address, var_map.ns);
+      }
   
       #ifdef DEBUG
       

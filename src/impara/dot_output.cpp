@@ -3,6 +3,7 @@
 Module: Graph Visualisation of Abstract Reachability Tree 
 
 Author: Daniel Kroening, kroening@kroening.com
+        Bjoern Wachter, bjoern.wachter@gmail.com
 
 \*******************************************************************/
 
@@ -102,23 +103,21 @@ void global_vector2string(const global_vectort& global_vector, std::string& pc_s
 {
     pc_string="PC=(";
 
-    
-
     for(unsigned 
         thr=0;
         thr<global_vector.size();
         thr++)
     {
-   	  std::string pc;
+      std::string pc;
 
       if(global_vector[thr].back().loc_number==(unsigned)-1)
-	    {
+      {
         pc="X";
-	    }
+      }
       else {
-		  for(unsigned i=0; i<global_vector[thr].size(); ++i)
-			  pc+=(i>0 ? "::" : "" ) + i2string(global_vector[thr][i].loc_number);
-	  }
+        for(unsigned i=0; i<global_vector[thr].size(); ++i)
+	  pc+=(i>0 ? "::" : "" ) + i2string(global_vector[thr][i].loc_number);
+      }
 
       pc_string+= (thr>0 ? ",":"") + pc;
     }
@@ -344,10 +343,5 @@ void nodest::dot_output(std::ostream& out, std::set<unsigned>& visible)
   }
   
   out << "}";
-
-
 }
-
-
-
 

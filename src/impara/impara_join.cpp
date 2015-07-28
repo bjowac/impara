@@ -3,6 +3,7 @@
 Module: Impara abstract domain
 
 Author: Daniel Kroening, kroening@kroening.com
+        Bjoern Wachter, bjoern.wachter@gmail.com
 
 \*******************************************************************/
 
@@ -19,9 +20,9 @@ Author: Daniel Kroening, kroening@kroening.com
 
 //#define DEBUG
 
-//#ifdef DEBUG
+#ifdef DEBUG
 #include <iostream>
-//#endif
+#endif
 
 
 bool is_bv_op(const exprt &expr)

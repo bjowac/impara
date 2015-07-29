@@ -355,14 +355,17 @@ bool impara_path_searcht::path_check(
     
       if(build_trace)
       {
-        impara_solvert solver(ns);
+        impara_solver_no_simplifiert solver(ns);
         
         solver.set_to(assumption, true);
         solver.set_to(conclusion, false);
         history.convert(solver,
           ancestor);
-
-        build_goto_trace(state, solver, error_trace, var_map.ns);
+        
+        if(solver.dec_solve() == decision_proceduret::D_SATISFIABLE)
+          build_goto_trace(state, solver, error_trace, var_map.ns);
+        else
+          throw "Unexpected decision procedure outcome";
       }
     
       if(loop && do_strengthen)

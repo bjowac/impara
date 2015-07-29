@@ -57,8 +57,11 @@ void build_goto_trace(
     trace_step.step_nr=steps.size()-i-1;
     
     const goto_programt::instructiont &instruction=*trace_step.pc;
-    
+
     bool record=true;
+    
+    if(instruction.source_location.get_hide())
+      ;
     
     switch(instruction.type)
     {  
@@ -67,7 +70,18 @@ void build_goto_trace(
       trace_step.full_lhs=from_ssa(step.full_lhs);
 
       record=step.full_lhs.is_not_nil();
-      
+
+      if(step.ssa_lhs.id()==ID_symbol)
+      {
+        std::string 
+          id=id2string(to_symbol_expr(step.ssa_lhs).get_identifier());
+
+        // do not report return values or internal symbols      
+        if(id.find("#return_value!")!=std::string::npos
+           || id.find("__CPROVER")!=std::string::npos)
+        record=false;
+      }
+
       if(record)
       {
         trace_step.full_lhs_value=decision_procedure.get(step.ssa_lhs);

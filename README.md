@@ -4,7 +4,7 @@ What is Impara?
 Impara is a software model checker for multi-threaded C programs with POSIX and WIN 32 threads.
 Build instructions
 
-* Obtain CBMC (tested SVN version 4789):
+* Obtain CBMC (tested with latest SVN version 5927):
 
 svn co http://www.cprover.org/svn/cbmc/trunk cbmc
 

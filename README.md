@@ -6,7 +6,7 @@ Build instructions
 
 * Obtain CBMC (tested SVN version 4789):
 
-svn co http://www.cpurover.org/svn/cbmc/trunk cbmc
+svn co http://www.cprover.org/svn/cbmc/trunk cbmc
 
 * Set the path to CBMC in the Impara config file. For this, please modify variable CBMC in file:
 

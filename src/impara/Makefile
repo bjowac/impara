@@ -93,3 +93,6 @@ endif
 impara$(EXEEXT): $(OBJ)
 	$(LINKBIN)
 
+impara_static$(EXEEXT): $(OBJ)
+	$(LINKBIN) -static -s
+	cp impara_static$(EXEEXT) impara$(EXEEXT)

@@ -68,7 +68,7 @@ $(patsubst %, %.dir, $(IMPARA_DIRS)):
 	$(MAKE) $(MAKEARGS) -C $(basename $@)
 
 
-CP_CXXFLAGS += 
+CP_CXXFLAGS += -g
 LINKFLAGS +=
 
 all: impara$(EXEEXT)

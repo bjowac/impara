@@ -6,6 +6,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 \*******************************************************************/
 
+#include <algorithm>
 
 #include <util/simplify_expr.h>
 #include "from_ssa.h"
@@ -18,6 +19,32 @@ Author: Daniel Kroening, kroening@kroening.com
 #ifdef DEBUG
 #include <iostream>
 #endif
+
+
+// Obtain the identifier from the code
+irep_idt getFunctionIdentifier(const goto_programt::instructiont &instruction)
+{
+
+  if(instruction.type == FUNCTION_CALL)
+  {
+ 
+    const code_function_callt &call = to_code_function_call(instruction.code);
+    const exprt &function = call.function();
+    
+    if(function.id() == ID_symbol)
+    {
+      irep_idt id = to_symbol_expr(function).get_identifier();
+      
+      std::cout << "Function call id " << id << std::endl;
+    
+      return id;
+    }
+  }
+  
+  // Give up
+  return irep_idt();
+}
+
 
 
 /*******************************************************************\
@@ -45,7 +72,13 @@ void build_goto_trace(
 
   state.history.build_history(steps);
 
-  for(int i=steps.size()-1; i >= 0; --i)
+  std::reverse(steps.begin(), steps.end());
+
+  std::map<unsigned, std::vector<irep_idt> > call_stack;
+
+  unsigned step_nr = 0;
+
+  for(unsigned int i=0; i < steps.size(); ++i)
   {
     const impara_stept &step=*steps[i];
   
@@ -54,14 +87,11 @@ void build_goto_trace(
     assert(!step.pc.is_nil());
     trace_step.pc=state.locs[step.pc].target;
     trace_step.thread_nr=step.thread_nr;
-    trace_step.step_nr=steps.size()-i-1;
+    trace_step.step_nr=step_nr;
     
     const goto_programt::instructiont &instruction=*trace_step.pc;
 
-    bool record=true;
-    
-    if(instruction.source_location.get_hide())
-      ;
+    bool record = !instruction.source_location.get_hide();
     
     switch(instruction.type)
     {  
@@ -79,7 +109,7 @@ void build_goto_trace(
         // do not report return values or internal symbols      
         if(id.find("#return_value!")!=std::string::npos
            || id.find("__CPROVER")!=std::string::npos)
-        record=false;
+          record=false;
       }
 
       if(record)
@@ -116,10 +146,14 @@ void build_goto_trace(
       
     case FUNCTION_CALL:
       trace_step.type=goto_trace_stept::FUNCTION_CALL;
+      trace_step.identifier = getFunctionIdentifier(instruction);
+      call_stack[step.thread_nr].push_back(trace_step.identifier);
       break;
     
     case END_FUNCTION:
       trace_step.type=goto_trace_stept::FUNCTION_RETURN;
+      trace_step.identifier = call_stack[step.thread_nr].back();
+      call_stack[step.thread_nr].pop_back();
       break;
       
     case START_THREAD:
@@ -140,6 +174,7 @@ void build_goto_trace(
   
     if(record)
     {
+      ++step_nr;
       goto_trace.add_step(trace_step);
     }
   }
@@ -152,7 +187,7 @@ void build_goto_trace(
 
   trace_step.pc=state.get_instruction();
   trace_step.thread_nr=state.get_current_thread();
-  trace_step.step_nr=steps.size();
+  trace_step.step_nr=step_nr;
   trace_step.type=goto_trace_stept::ASSERT;
 
   const irep_idt &comment=

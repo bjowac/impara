@@ -59,10 +59,7 @@ void symext::assign(
 
   }
   catch(std::string& s)
-  {
-    std::cout << "Warning: " << s << " in " 
-            << " " << as_string(state.var_map.ns, *state.get_instruction()) 
-            << std::endl;          
+  {          
 		return;
   }
 
@@ -963,8 +960,6 @@ void symext::operator()(
 
       statet::threadt &old_thread=state.threads[state.get_current_thread()];
       new_thread.pc=loc.branch_target;
-      
-      unsigned current_thread=state.get_current_thread();
       
       // copy over local variables to new_thread
       for(statet::var_valt::const_iterator

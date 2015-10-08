@@ -544,8 +544,6 @@ int impara_parse_optionst::doit()
   impara_path_search.do_check_proof=options.get_signed_int_option("check-proof");
   impara_path_search.do_graphml_cex=options.get_bool_option("do-graphml-cex");
 
-  //impara_path_search.set_ui(get_ui());
-
   switch(impara_path_search(goto_functions))
   {
   case safety_checkert::SAFE:

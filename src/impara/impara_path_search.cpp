@@ -800,7 +800,7 @@ void impara_path_searcht::search()
 
 /*******************************************************************\
 
-Function: impara_path_searcht::report_statistics
+Function: impara_path_searcht::report_limits
 
   Inputs:
 
@@ -848,7 +848,6 @@ void impara_path_searcht::report_statistics()
       << "Threads: " << number_of_threads << std::endl;
   str << "Nodes:   " << nodes.node_counter << "\n"
       << "States:  " << (queue.size() + number_of_dropped_states + number_of_finished_states) << std::endl;
-;
   str << "Cover checks: " << std::endl
       << " * ordinary " << cover_checks_ok << " / " << cover_checks_total << std::endl;
 
@@ -858,13 +857,7 @@ void impara_path_searcht::report_statistics()
   }
   
   str << "Number of uncoverings " << number_of_uncoverings << std::endl;
-  
-  #if 0
-  str << "Implication checks: " << std::endl
-      << " * syntactic  " << cover_checks_syntactic_ok << " / " << cover_checks_syntactic << std::endl
-      << " * SMT solver " << cover_checks_smt_ok << " / " << cover_checks_smt << std::endl;  
-  #endif
-
+ 
   str << "Refinements: " << std::endl
       << " * nr  " << refinements << std::endl;
 
@@ -895,7 +888,6 @@ void impara_path_searcht::report_statistics()
                << "  Force " << force_time  << " s " << messaget::eom
                << "  Domain "<< domain_time << " s" << messaget::eom
                << messaget::eom;
-
 }
 
 

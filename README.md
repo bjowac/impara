@@ -1,6 +1,6 @@
 Impara is a software model checker for multi-threaded C programs with POSIX and WIN 32 threads.
 
-[SVCOMP 2016 Binary](https://github.com/bjowac/impara/releases/tag/0.4.3)
+[SVCOMP 2016: Binary and Sources](https://github.com/bjowac/impara/releases/tag/0.4.3)
 
 
 Use the SVCOMP binary or build yourself:

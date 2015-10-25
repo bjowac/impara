@@ -74,7 +74,7 @@ void build_goto_trace(
 
   std::reverse(steps.begin(), steps.end());
 
-  std::map<unsigned, std::vector<irep_idt> > call_stack;
+  std::vector< std::vector<irep_idt> > call_stack;
 
   unsigned step_nr = 0;
 
@@ -147,13 +147,25 @@ void build_goto_trace(
     case FUNCTION_CALL:
       trace_step.type=goto_trace_stept::FUNCTION_CALL;
       trace_step.identifier = getFunctionIdentifier(instruction);
+
+      if (step.thread_nr >= call_stack.size()) {
+	call_stack.resize(step.thread_nr + 1);
+      }
+
       call_stack[step.thread_nr].push_back(trace_step.identifier);
       break;
     
     case END_FUNCTION:
       trace_step.type=goto_trace_stept::FUNCTION_RETURN;
-      trace_step.identifier = call_stack[step.thread_nr].back();
-      call_stack[step.thread_nr].pop_back();
+
+      if (call_stack.size() > step.thread_nr) {
+	if (!call_stack[step.thread_nr].empty()) {
+          trace_step.identifier = call_stack[step.thread_nr].back();
+	  call_stack[step.thread_nr].pop_back();
+	}
+      } else {
+	trace_step.identifier = "main";
+      }
       break;
       
     case START_THREAD:

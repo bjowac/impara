@@ -559,7 +559,7 @@ bool impara_path_searcht::drop_thread(statet &state)
 
   unsigned unwindings=state.get_no_unwindings();
 
-  if(unwindings>1)
+  if(unwindings>10)
     status() << "Loop " << state.get_instruction()->source_location
       << " : unwindings " << unwindings << eom;
 

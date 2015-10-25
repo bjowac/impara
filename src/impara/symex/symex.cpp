@@ -967,7 +967,7 @@ void symext::operator()(
           var_it!=old_thread.local_vars.end();
           ++var_it)
       {
-        symbol_exprt ssa_rhs=var_it->ssa_symbol;
+        const symbol_exprt ssa_rhs=var_it->ssa_symbol;
         
         if(ssa_rhs.id()!=ID_symbol)
           continue;

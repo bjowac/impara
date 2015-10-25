@@ -54,9 +54,9 @@ bool contains_if(exprt &dest,
 
 Function: rewrite_byte_expr
 
-  Inputs: 
+  Inputs:
 
- Outputs: 
+ Outputs:
 
  Purpose:
 
@@ -67,64 +67,66 @@ void simplify_byte_expr(exprt &dest,
 {
 
   /*
-   * byte_update(byte_update(e, i, v, t), i, v', t) 
+   * byte_update(byte_update(e, i, v, t), i, v', t)
+   *             -----------------------
+   *                    root
    *  =>
    * byte_update(e, i, v', t)
    */
-  if(dest.id()==ID_byte_update_little_endian 
+  if(dest.id()==ID_byte_update_little_endian
   || dest.id()==ID_byte_update_big_endian)
   {
-  
+
     exprt &root=dest.op0();
     exprt &offset=dest.op1();
-    const typet &type=dest.type();
-  
-    if(root.id()==ID_byte_update_little_endian 
+    const typet &type=root.type();
+
+    if(root.id()==ID_byte_update_little_endian
     || root.id()==ID_byte_update_big_endian)
     {
       exprt &nested_root=root.op0();
       exprt &nested_offset=root.op1();
       const typet &nested_type=root.type();
-      
-      
+
+
       if(offset == nested_offset
       && type == nested_type)
       {
-      
+
         #ifdef DEBUG
         std::cout << "simplify_byte_expr " << from_expr(dest) << std::endl;
         #endif
-      
+
         root.swap(nested_root);
-        
+
         #ifdef DEBUG
         std::cout << "  ==> " << from_expr(dest) << std::endl;
-        #endif       
-      }          
+        #endif
+      }
     }
   }
-  
+
   /*
-   * byte_extract(byte_update(e, i, v, t), i, t) 
+   * byte_extract(byte_update(e, i, v, t), i, t)
    *  =>
    * v
    */
-  else 
-  if(dest.id()==ID_byte_extract_little_endian 
+  else
+  if(dest.id()==ID_byte_extract_little_endian
   || dest.id()==ID_byte_extract_big_endian)
   {
     exprt &root=dest.op0();
     exprt &offset=dest.op1();
     const typet &type=dest.type();
-  
-    if(root.id()==ID_byte_update_little_endian 
+
+    if(root.id()==ID_byte_update_little_endian
     || root.id()==ID_byte_update_big_endian)
     {
       exprt &nested_offset=root.op1();
       exprt &nested_with=root.op2();
       const typet &nested_type=root.type();
-      
-      
+
+
       if(offset == nested_offset
       && type == nested_type)
       {
@@ -133,13 +135,13 @@ void simplify_byte_expr(exprt &dest,
         #endif
 
         dest.swap(nested_with);
-        
+
         //#ifdef DEBUG
         std::cout << "  ==> " << from_expr(dest) << std::endl;
         //#endif
-      }          
+      }
     }
-  }    
+  }
 
   if(dest.has_operands())
     Forall_operands(it, dest)
@@ -147,170 +149,29 @@ void simplify_byte_expr(exprt &dest,
 }
                        
 
-
-/*******************************************************************\
-
-Function: expand_if
-
-  Inputs: 
-
- Outputs: 
-
- Purpose:
-    Expand tri-state if-expressions using the rule:
-
-    (c ? a : b) == f
-    --------------
-    (c ? a == f : b == f)
-
-\*******************************************************************/
-
-
-exprt simplified_if(
-  const exprt &cond,
-  const exprt &a,
-  const exprt &b,
-  const namespacet &ns)
-{
-  exprt lhs=cond;
-  impara_conjoin(a, lhs, ns);
-  exprt rhs=not_exprt(cond);
-  impara_conjoin(b, rhs, ns);
-  impara_disjoin(lhs, rhs, ns);
-  
-  return rhs;
-}
-
-void rewrite_if(exprt &dest,
-              const namespacet &ns)
-{
-
-
-  if(dest.id()==ID_not)
-  {
-    rewrite_if(dest.op0(), ns);
-
-    if(dest.op0().id() == ID_if)
-    {
-      const if_exprt &if_expr=to_if_expr(dest.op0());
-
-      dest=if_exprt(if_expr.cond(), not_exprt(if_expr.true_case()), not_exprt(if_expr.false_case()));
-    } 
-  }
-  else
-  if(dest.id()==ID_equal || dest.id()==ID_notequal ||
-     dest.id()==ID_gt || dest.id()==ID_lt ||
-     dest.id()==ID_ge || dest.id()==ID_le)
-  {
-    assert(dest.operands().size()==2);
-
-    if(dest.op0().id()==ID_typecast)
-    {
-      const typecast_exprt& tc=to_typecast_expr(dest.op0());
-
-      if(dest.op1().type()!=tc.op0().type())
-      {
-        dest.op1()=typecast_exprt(dest.op1(), tc.op0().type());
-      }
-      
-      dest.op0()=tc.op0();
-      
-      rewrite_if(dest, ns);
-      
-      return;
-
-      if(tc.op0().id()==ID_if)
-      {
-	      const if_exprt &if_expr=to_if_expr(tc.op0());
-
-        exprt a=binary_relation_exprt( typecast_exprt(if_expr.true_case(),tc.type()), dest.id(), dest.op1());
-			  exprt b=binary_relation_exprt( typecast_exprt(if_expr.false_case(),tc.type()), dest.id(), dest.op1());
-			  
-			  rewrite_if(a, ns);
-			  rewrite_if(b, ns);
-
-	      dest=if_exprt(if_expr.cond(), a, b);
-	      return;
-      }
-    }
-
-
-    if(dest.op0().id()==ID_if) 
-    {
-      const if_exprt &if_expr=to_if_expr(dest.op0());
-
-      exprt a=binary_relation_exprt( if_expr.true_case(), dest.id(), dest.op1());
-      exprt b=binary_relation_exprt( if_expr.false_case(), dest.id(), dest.op1());
-
-      rewrite_if(a, ns);
-      rewrite_if(b, ns);
-      
-      dest=if_exprt(if_expr.cond(), a, b);
-      return;
-    } else if(dest.op1().id()==ID_if) 
-    {
-      const if_exprt &if_expr=to_if_expr(dest.op1());
-
-      dest=if_exprt(if_expr.cond(), 
-                    binary_relation_exprt( if_expr.true_case(), dest.id(), dest.op0()),
-		                binary_relation_exprt( if_expr.false_case(), dest.id(), dest.op0()));
-      return;
-    } 
-  }
-    
-  if(dest.has_operands())
-    Forall_operands(it, dest)
-      rewrite_if(*it, ns);
-}
-
-
-/*******************************************************************\
-
-Function: strip_nested_casts
-
-  Inputs: 
-
- Outputs: 
-
- Purpose:
-
-\*******************************************************************/
-
-const exprt& strip_nested_casts(const exprt& expr)
-{
-  if(expr.id()==ID_typecast)
-  {
-    strip_nested_casts(expr.op0());
-  }
-
-  return expr;
-}
-
-
-
 exprt original(const exprt &src)
 {
   if(src.id()==ID_symbol)
   {
     const std::string &identifier=id2string(to_symbol_expr(src).get_identifier());
     std::size_t pos=identifier.rfind('#');
-    if(pos==std::string::npos) return src;    
+    if(pos==std::string::npos) return src;
     return symbol_exprt(identifier.substr(0,pos), src.type());
   }
-  
+
   if(src.has_operands())
   {
     exprt tmp=src;
-  
+
     Forall_operands(it, tmp)
     {
       exprt tmp2=original(*it);
       *it=tmp2;
     }
-    
+
     return tmp;
   }
-  
+
   return src;
 }
 
@@ -335,8 +196,6 @@ exprt step_wp(
   
   const symbol_exprt &ssa_lhs_symbol(to_symbol_expr(step.ssa_lhs));
 
-  bool change=false;
-
   // wp(a:=b, x) = x[a<-b]
   if(step.full_lhs.is_not_nil() && has_symbol(ssa_lhs_symbol, wp))
   {
@@ -359,7 +218,6 @@ exprt step_wp(
 
     simplify_byte_expr(wp, ns);
 
-    change=true;
   }
   
   if(!step.is_hidden())
@@ -370,14 +228,7 @@ exprt step_wp(
       exprt negated_guard=not_exprt(step.guard);
 
       impara_disjoin(negated_guard, wp, ns);
-
-      change=true;
     }
-  }
-  
-  if(change)
-  { 
-    rewrite_if(wp, ns);
   }
   
   return wp;

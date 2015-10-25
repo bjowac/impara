@@ -20,6 +20,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/replace_expr.h>
 #include <util/base_type.h>
 #include <util/prefix.h>
+#include <util/type_eq.h>
 
 #include <goto-symex/rewrite_union.h>
 #include <goto-symex/adjust_float_expressions.h>
@@ -85,11 +86,11 @@ exprt statet::read(const exprt &src, bool propagate)
   std::cout << "   == instantiate ==> " << from_expr(var_map.ns, "", tmp3) << std::endl;
 #endif
   
-  exprt tmp5=  simplify_pointer_checks(tmp4);
+  //exprt tmp5=  simplify_pointer_checks(tmp4);
   
-  simplify(tmp5, var_map.ns);
+  simplify(tmp4, var_map.ns);
 
-  return tmp5;
+  return tmp4;
 }
 
 
@@ -291,9 +292,9 @@ struct address_dividert
 
   exprt operator()(const exprt &expr)
   {
-		if(d==gen_one(d.type()))
-			return expr;
-  
+    if(d==gen_one(d.type()))
+	    return expr;
+
     if(d.id()==ID_constant)
     {
       return plus(expr);
@@ -318,7 +319,7 @@ struct address_dividert
     }
     else if(expr.id()==ID_typecast)
     {
-			exprt tmp=expr;
+        exprt tmp=expr;
     	exprt op0=plus(expr.op0());
     	tmp.op0().swap(op0);
     	return tmp;
@@ -374,19 +375,16 @@ struct address_dividert
 exprt statet::simplify_byte_extract(
   const exprt &src)
 { 
- 
   const byte_extract_exprt &byte_extract=to_byte_extract_expr(src);
   const exprt &object=byte_extract.op();
-
   const typet &object_type=var_map.ns.follow(object.type());
+  const typet element_type=var_map.ns.follow(byte_extract.type());
 
-  if(object_type.id()==ID_array)
-  {
+  if (object_type.id()==ID_array && type_eq(object_type.subtype(), element_type, var_map.ns)) {
+
     const typet base_object_type=var_map.ns.follow(object_type.subtype());
-    const typet element_type=var_map.ns.follow(byte_extract.type());
-     
-    const exprt &offset=byte_extract.offset();
 
+    const exprt &offset=byte_extract.offset();
 
     mp_integer element_width=pointer_offset_size(element_type, var_map.ns);
     std::string index_width=id2string(offset.type().get(ID_width));
@@ -396,33 +394,13 @@ exprt statet::simplify_byte_extract(
 
     exprt index=divider(byte_extract.offset());
     
-    if(!index.is_nil())
-    {
+    if (!index.is_nil()) {
       simplify(index, var_map.ns);
       
       //if(base_object_type!=element_type)
       return index_exprt(object, index, src.type());
     }
-    else
-    {
-    
-    
-      #ifdef DEBUG
-      std::cout << "byte_extract :-( " << from_expr(byte_extract)
-                                   << "\n   * element type:\n "
-                                   << element_type.pretty()
-                                   << "\n   * width:\n"
-                                   << from_expr(byte_width)
-                                   << "\n   * offset:\n"
-                                   << from_expr(byte_extract.offset()) 
-                                   << "\n   * index:\n"
-                                   << from_expr(index)<< std::endl;
-      #endif                 
-    }
   }  
-  else 
-  {
-  }
   
   return src;
 }
@@ -711,96 +689,6 @@ std::string statet::array_index_as_string(const exprt &src) const
 
 /*******************************************************************\
 
-Function: strip_typecasts
-
-  Inputs:
-
- Outputs:
-
- Purpose:
-
-\*******************************************************************/
-
-exprt strip_typecasts(const exprt &src)
-{
-  if(src.id()==ID_typecast)
-  {
-    return strip_typecasts(src.op0());
-  }
-
-  exprt src2=src;
-  
-  {
-    // recursive calls on structure of 'src'
-    Forall_operands(it, src2)
-    {
-      exprt tmp_op=strip_typecasts(*it);
-      *it=tmp_op;
-    }
-  }
-
-  return src2;
-}
-
-/*******************************************************************\
-
-Function: strip_pointer_typecasts
-
-  Inputs:
-
- Outputs:
-
- Purpose:
-
-\*******************************************************************/
-
-exprt strip_pointer_typecasts(const exprt &src)
-{
-  if(src.id()==ID_typecast)
-  {
-    exprt tmp=strip_pointer_typecasts(src.op0());
-    
-    if(tmp.type().id()==ID_pointer && src.type().id()!=ID_pointer)
-      return tmp;
-    else
-      return typecast_exprt(tmp, src.type());
-  }
-  else
-  if(src.id()==ID_plus)
-  {
-    exprt pointer=src.op0(), offset=src.op1();
-    
-    if(pointer.type().id()!=ID_pointer && offset.type().id()!=ID_pointer)
-      return src;
-       
-    if(offset.type().id()==ID_pointer)
-    {
-      offset.swap(pointer);
-    }
-
-    return plus_exprt(pointer, offset, pointer.type());    
-  }
-
-  
-
-  exprt src2=src;
-  
-  {
-    // recursive calls on structure of 'src'
-    Forall_operands(it, src2)
-    {
-      exprt tmp_op=strip_pointer_typecasts(*it);
-      *it=tmp_op;
-    }
-  }
-  
-  return src2;
-  
-}
-
-
-/*******************************************************************\
-
 Function: statet::dereference_rec
 
   Inputs:
@@ -883,7 +771,7 @@ exprt statet::dereference_rec(
                 << from_expr(var_map.ns, "", address_prop) 
                 << " ??? " << from_expr(var_map.ns, "", dereference_expr.pointer()) << std::endl;
 
-	      return value_symbol.symbol_expr();
+	return value_symbol.symbol_expr();
       }
 	      
     }
@@ -1024,120 +912,6 @@ void statet::collect_objects(const exprt &src, std::set<exprt> &result)
 }
 
 
-/*******************************************************************\
-
-Function: statet::is_null
-
-  Inputs:
-
- Outputs:
-
- Purpose: checks if an expression is NULL
-
-\*******************************************************************/
-
-bool statet::is_null(const exprt &src) const
-{
-  if(src.type().id()!=ID_pointer)
-    return false;
-
-  const exprt &obj=strip_typecasts(src);
-
-  if(obj.is_zero())
-    return true;
-
-  if(obj.id()==ID_constant && obj.get(ID_value)==ID_NULL)
-    return true;
-    
-  return false;
-}
-
-
-/*******************************************************************\
-
-Function: statet::simplify_pointer_checks
-
-  Inputs:
-
- Outputs:
-
- Purpose: using points-to information from statet we rewrite:
-          * POINTER_OBJECT(&object) == POINTER_OBJECT(NULL)
-            => FALSE
-          * INVALID_OBJECT(&...)
-            => FALSE
-
-\*******************************************************************/
-
-exprt statet::simplify_pointer_checks(const exprt &src)
-{
-  if(src.id()==ID_invalid_pointer)
-  {
-    exprt obj=read(src.op0());
-  
-    if(obj.id()==ID_address_of)
-    {
-      return false_exprt();
-    }
-    else if(is_null(obj))
-    {
-      return true_exprt();
-    }
-    else
-    {
-      return src;
-    }
-  }
-  
-  if(src.id()==ID_equal)
-  {
-    const exprt &lhs=src.op0();
-    const exprt &rhs=src.op1();
-    
-    if(lhs.id()==ID_pointer_object && rhs.id()==ID_pointer_object)
-    {
-      exprt lhs_obj=read(lhs.op0());
-      exprt rhs_obj=read(rhs.op0());
-      
-      std::set<exprt> objects;
-      
-      collect_objects(rhs_obj, objects);
-      
-      for(std::set<exprt>::const_iterator 
-          it=objects.begin();
-          it!=objects.end();
-          ++it)
-      {
-        const exprt &other_obj=strip_pointer_typecasts(*it);
-
-        exprt result=src;
-      
-        if(lhs_obj.id()==ID_address_of || lhs_obj.id()==ID_plus)
-        {        
-          if(is_null(other_obj))
-            result=false_exprt();
-          else if(other_obj.id()==ID_address_of && lhs_obj.op0()!=other_obj.op0())
-            result=false_exprt();
-        }
-        
-        return result;
-      }  
-    }    
-  }
-  
-  exprt src2=src;
-  
-  {
-    // recursive calls on structure of 'src'
-    Forall_operands(it, src2)
-    {
-      exprt tmp_op=simplify_pointer_checks(*it);
-      *it=tmp_op;
-    }
-  }
-  
-  return src2;
-}
 
 
 exprt statet::simplify_with(const exprt &src)

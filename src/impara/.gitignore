@@ -1,3 +1,8 @@
 *.o
 *.d
 impara
+impara_static
+symex/symex.a
+.project
+.cproject
+.settings

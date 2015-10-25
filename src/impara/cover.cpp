@@ -125,6 +125,9 @@ bool impara_path_searcht::force_cover(statet &state,
     if(ancestor.is_nil())
       continue;
 
+    if(!ancestor->has_label())
+      continue;
+
     ++attempts;
   
     bool loop=(other_ref==ancestor); 
@@ -355,17 +358,25 @@ bool impara_path_searcht::path_check(
     
       if(build_trace)
       {
-        impara_solver_no_simplifiert solver(ns);
+        impara_solver_no_simplifiert detailed_solver(ns);
         
-        solver.set_to(assumption, true);
-        solver.set_to(conclusion, false);
-        history.convert(solver,
+        detailed_solver.set_to(assumption, true);
+        detailed_solver.set_to(conclusion, false);
+        history.convert(detailed_solver,
           ancestor);
         
-        if(solver.dec_solve() == decision_proceduret::D_SATISFIABLE)
-          build_goto_trace(state, solver, error_trace, var_map.ns);
-        else
-          throw "Unexpected decision procedure outcome";
+        switch(detailed_solver.dec_solve())
+        {
+          case decision_proceduret::D_SATISFIABLE:
+            build_goto_trace(state, detailed_solver, error_trace, var_map.ns);
+            break;
+          case decision_proceduret::D_UNSATISFIABLE:
+            throw "unexpected UNSAT";
+            break;
+          default:
+            throw "Solver inconclusive";
+            break;
+        }
       }
     
       if(loop && do_strengthen)

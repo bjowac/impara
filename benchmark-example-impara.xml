@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE benchmark PUBLIC "+//IDN sosy-lab.org//DTD BenchExec benchmark 1.0//EN" "http://www.sosy-lab.org/benchexec/benchmark-1.0.dtd">
+<!-- Example file for benchmark definition for BenchExec,
+     using tool "cbmc" with a CPU time limit of 60s,
+     1000 MB of RAM, and 1 CPU core.
+     To use this file, CBMC needs to be on PATH
+     and C programs from SV-COMP need to be available in directory programs/
+     (or input files need to be changed). -->
+<benchmark tool="impara"
+           timelimit="60"
+           hardtimelimit="90"
+           memlimit="1000"
+           cpuCores="1">
+
+  <!-- <rundefinition> defines tool configurations to benchmark. -->
+
+
+  <rundefinition name="eager">
+    <option name="--eager"></option>
+  </rundefinition>
+
+  <!-- <tasks> defines a set of tasks
+       (here two group of files from SV-COMP15 declared in a separate file). -->
+
+
+  <tasks name="ControlFlowInteger">
+    <includesfile>/home/bjowac/sv-benchmarks/c/ControlFlowInteger.set</includesfile>
+  </tasks>
+
+
+  <tasks name="Simple.set">
+    <includesfile>/home/bjowac/sv-benchmarks/c/Concurrency.set</includesfile>
+  </tasks>
+  
+  <tasks name="Simple.set">
+    <includesfile>/home/bjowac/sv-benchmarks/c/Simple.set</includesfile>
+  </tasks>
+
+  <!-- Use an SV-COMP property file as specification
+    (file ALL.prp in the same directory as each source file). -->
+  <propertyfile>${inputfile_path}/ALL.prp</propertyfile>
+</benchmark>

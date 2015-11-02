@@ -75,6 +75,7 @@ void build_goto_trace(
   std::reverse(steps.begin(), steps.end());
 
   std::vector< std::vector<irep_idt> > call_stack;
+  call_stack.resize(1);
 
   unsigned step_nr = 0;
 
@@ -127,8 +128,7 @@ void build_goto_trace(
 
       record=step.full_lhs.is_not_nil();
       
-      if(record)
-      {
+      if(record) {
         trace_step.full_lhs_value=decision_procedure.get(step.ssa_lhs);
         simplify(trace_step.full_lhs_value, ns);
         trace_step.lhs_object_value=decision_procedure.get(step.ssa_lhs);
@@ -166,6 +166,11 @@ void build_goto_trace(
       } else {
 	trace_step.identifier = "main";
       }
+
+      if (trace_step.identifier == "") {
+	record = false;
+      }
+
       break;
       
     case START_THREAD:

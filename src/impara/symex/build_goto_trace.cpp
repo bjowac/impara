@@ -34,8 +34,6 @@ irep_idt getFunctionIdentifier(const goto_programt::instructiont &instruction)
     if(function.id() == ID_symbol)
     {
       irep_idt id = to_symbol_expr(function).get_identifier();
-      
-      std::cout << "Function call id " << id << std::endl;
     
       return id;
     }

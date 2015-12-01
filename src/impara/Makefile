@@ -26,8 +26,6 @@ SRC = main.cpp\
       interpolate/interpolator.cpp\
       interpolate/step_wp.cpp\
       interpolate/quantifier_elimination.cpp\
-      interpolate/wordlevel_interpolator.cpp\
-      interpolate/wordlevel_axioms.cpp\
       dot_output.cpp\
       nodes.cpp\
       interleaving/mpor/partial_order_reduction.cpp\

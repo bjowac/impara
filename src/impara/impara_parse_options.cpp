@@ -31,7 +31,7 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <goto-programs/read_goto_binary.h>
 #include <goto-programs/link_to_library.h>
 #include <goto-programs/xml_goto_trace.h>
-#include <goto-programs/graphml_goto_trace.h>
+#include <goto-programs/graphml_witness.h>
 
 #include <analyses/goto_check.h>
 
@@ -65,7 +65,8 @@ Function: impara_parse_optionst::impara_parse_optionst
 impara_parse_optionst::impara_parse_optionst(int argc, const char **argv):
   parse_options_baset(IMPARA_OPTIONS, argc, argv),
   xml_interfacet(cmdline),
-  language_uit("IMPARA " IMPARA_VERSION, cmdline)
+  language_uit(cmdline, ui_message_handler),
+  ui_message_handler(cmdline, "IMPARA " IMPARA_VERSION)
 {
 }
   
@@ -559,14 +560,14 @@ int impara_parse_optionst::doit()
     
     if(impara_path_search.do_graphml_cex)
     {
-      graphmlt graphml_cex;
-      
-      convert(ns, impara_path_search.error_trace, graphml_cex);
-      
+      graphml_witnesst graphml_cex(ns);
+
       std::string filename=options.get_option("graphml-cex");
-      
+     
+      // FIXME: Make this work again (analogue to CBMC)
+ 
       std::ofstream graphml_file(filename.c_str());
-      write_graphml(graphml_cex, graphml_file);
+      write_graphml(graphml_cex.graph(), graphml_file);
     }
     
     return 10;
@@ -795,7 +796,7 @@ bool impara_parse_optionst::get_goto_program(
            symbol_table, goto_functions, get_message_handler()))
         return true;
         
-      config.ansi_c.set_from_symbol_table(symbol_table);
+      config.set_from_symbol_table(symbol_table);
 
       if(cmdline.isset("show-symbol-table"))
       {

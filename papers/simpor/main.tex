@@ -94,6 +94,7 @@ For a state $q\in Q$, we denote by $succ(q)$ the \emph{successor set}:
 
 In this subsection, we revisit an automata-theoretic characterisation
 of Mazurkievicz traces, in terms of the language of an automaton.
+% FIXME: need to say what M. traces are beforehand.
 %
 We develop this automaton in two steps.
 As a first step, we give an automaton that only observes
@@ -105,6 +106,15 @@ In a second step, we define a constrained automaton that
 filters out redundant, i.e., Mazurkievicz-equivalent traces.
 %
 \begin{definition}[Dependency-Chain Automaton]
+
+% - 
+% - dependencies between variable accesses
+% - a pair of accesses from two different threads
+%   (without a happens-before relationship) to the same memory location 
+%   creates a conflict, in that one of the accesses must come first in any given trace; 
+%   the different ordering within a trace result in different states.
+% - 
+%
 
 The dependency-chain automaton $A_D$ is defined as follows:
 %
@@ -130,7 +140,7 @@ The dependency-chain automaton $A_D$ is defined as follows:
        {dm'}_{a,b} & =
        \begin{cases}
        1                                                        & ;\  a=b=i\\
-       -1                                                       & ;\ a=i\neq b \\
+       -1                                                       & ;\ a=i, b\neq i\\
        dm_{p,q}                                                 & ;\ a\neq i, b\neq i \\
        0                                                        & ;\ a\neq i, b=i, dm_{b,b}=0\\
        \bigvee_{l=1..n} \left (dm_{a,l}=1 \wedge dep_{l,i} \right) & ;\ a\neq i, b=i, dm_{b,b}\neq 0\\
@@ -142,6 +152,14 @@ The dependency-chain automaton $A_D$ is defined as follows:
 \end{itemize}
 \end{definition}
 
+% What do the values -1, 0, 1 mean?
+
+% the dependency matrix describes the following mutually exclusive conditions:
+% - value 0  ... the thread b has not been executed at all so far.
+% - value 1  ... there is a conflict between current access of thread b, and most recent access of thread a.
+% - value -1 ... there is no such conflict.
+
+
 \begin{definition}[Partial-Order Automaton]
 \label{def:rautomaton}
 %
@@ -152,7 +170,7 @@ The dependency-chain automaton $A_D$ is defined as follows:
 %
     \begin{itemize}
       \item $guard(q_0,\sigma,.)=1$
-      \item $guard(q, (i,a), q')=\bigwedge_{j>i}  ( {q.dm}_{j,i}(k)= -1 \Longrightarrow \bigvee_{l<i} {{q'}.dm}_{j,l}=1)$
+      \item $guard(q, (i,a), q')=\bigwedge_{j>i}  ( {q.dm}_{j,i}(k) \neq -1 \vee \bigvee_{l<i} {{q'}.dm}_{j,l}=1)$
     \end{itemize}
 %
   such that the reduced transition function is defined by:

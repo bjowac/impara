@@ -172,7 +172,7 @@ void symext::symex_malloc(
     
       symbolt size_symbol;
 
-      size_symbol.base_name="dynamic_object_size"+i2string(dynamic_count);
+      size_symbol.base_name="dynamic_object_size"+std::to_string(dynamic_count);
       size_symbol.name="symex_dynamic::"+id2string(size_symbol.base_name);
       size_symbol.is_lvalue=true;
       size_symbol.type=tmp_size.type();
@@ -191,7 +191,7 @@ void symext::symex_malloc(
   // value
   symbolt value_symbol;
 
-  value_symbol.base_name="dynamic_object"+i2string(state.dynamic_count);
+  value_symbol.base_name="dynamic_object"+std::to_string(state.dynamic_count);
   value_symbol.name="symex_dynamic::"+id2string(value_symbol.base_name);
   value_symbol.is_lvalue=true;
   value_symbol.type=object_type;

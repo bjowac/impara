@@ -116,7 +116,7 @@ void build_goto_trace(
         trace_step.full_lhs_value=decision_procedure.get(step.ssa_lhs);
         simplify(trace_step.full_lhs_value, ns);
         trace_step.lhs_object_value=decision_procedure.get(step.ssa_lhs);
-        trace_step.lhs_object=to_symbol_expr(step.full_lhs);
+        trace_step.lhs_object=ssa_exprt(step.full_lhs);
       }
       break;
     
@@ -130,7 +130,7 @@ void build_goto_trace(
         trace_step.full_lhs_value=decision_procedure.get(step.ssa_lhs);
         simplify(trace_step.full_lhs_value, ns);
         trace_step.lhs_object_value=decision_procedure.get(step.ssa_lhs);
-        trace_step.lhs_object=to_symbol_expr(step.full_lhs);
+        trace_step.lhs_object=ssa_exprt(step.full_lhs);
       }
       break;
       

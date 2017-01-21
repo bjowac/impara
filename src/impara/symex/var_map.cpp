@@ -8,7 +8,6 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <util/symbol.h>
 #include <util/std_expr.h>
-#include <util/i2string.h>
 #include <util/prefix.h>
 
 #include "var_map.h"
@@ -41,8 +40,6 @@ void impara_var_mapt::var_infot::output(std::ostream &out) const
   out << "\n";
   
   out << "number: " << number << "\n";
-  
-  out << "type: " << type << "\n";
   
   out << "\n";
 }
@@ -154,8 +151,8 @@ irep_idt impara_var_mapt::var_infot::ssa_identifier
   std::size_t pos_at=id_string.find('@');
 
   return id_string.substr(0, pos_at)
-         +(!kind.is_shared() && thread>0 ? "@"+i2string(thread) : "")
-         + "#"+i2string(counter);
+         +(!kind.is_shared() && thread>0 ? "@"+std::to_string(thread) : "")
+         + "#"+std::to_string(counter);
 }
 
 /*******************************************************************\

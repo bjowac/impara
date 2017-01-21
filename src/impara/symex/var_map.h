@@ -11,7 +11,6 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <ostream>
 
-#include <util/i2string.h>
 #include <util/namespace.h>
 #include <util/type.h>
 
@@ -72,7 +71,7 @@ public:
     void output(std::ostream &out) const;
   };
   
-  typedef hash_map_cont<irep_idt, var_infot, irep_id_hash> id_mapt;
+  typedef std::unordered_map<irep_idt, var_infot, irep_id_hash> id_mapt;
   id_mapt id_map;
 
   var_infot &operator()(

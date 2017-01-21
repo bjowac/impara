@@ -1,8 +1,6 @@
 #include <iostream>
 #include <algorithm>
 
-#include <util/i2string.h>
-
 #include <path-symex/locs.h>
 
 #include <symex/state.h>

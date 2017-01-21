@@ -69,7 +69,7 @@ public:
                           const mem_sett& writes, 
                           step_sett&);
  
-  typedef hash_map_cont<stept, mem_sett> step_memt;    
+  typedef std::unordered_map<stept, mem_sett> step_memt;    
 
   struct accessort
   {
@@ -77,7 +77,7 @@ public:
     step_sett writes;
   };
 
-  typedef hash_map_cont<memt, accessort, irep_full_hash, irep_full_eq> 
+  typedef std::unordered_map<memt, accessort, irep_full_hash, irep_full_eq> 
   mem_stept;
 
   step_memt step_writes;
@@ -94,7 +94,7 @@ protected:
   void insert(unsigned i, const step_sett &from, step_sett &dest);
 
   typedef unsigned thread_idt; 
-  typedef hash_map_cont<thread_idt, unsigned> thread_creatort;
+  typedef std::unordered_map<thread_idt, unsigned> thread_creatort;
   thread_creatort thread_creator;
 };
 

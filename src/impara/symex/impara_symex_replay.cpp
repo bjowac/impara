@@ -9,7 +9,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/arith_tools.h>
 #include <util/simplify_expr.h>
 #include <util/byte_operators.h>
-#include <util/i2string.h>
 #include <util/pointer_offset_size.h>
 #include <util/expr_util.h>
 
@@ -52,11 +51,11 @@ struct replay_stept
 
   std::string pretty()
   {
-    return i2string(depth) + " " 
-         + i2string(from_thread) + " "
-         + i2string(to_thread) + " "
+    return std::to_string(depth) + " " 
+         + std::to_string(from_thread) + " "
+         + std::to_string(to_thread) + " "
          + (branch_taken ? "TAKEN" : "NOT TAKEN") + " "
-         + i2string(pc.loc_number);
+         + std::to_string(pc.loc_number);
   }
   
 };

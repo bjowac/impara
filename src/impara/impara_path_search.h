@@ -200,7 +200,7 @@ protected:
 
   bool force_cover(statet&, unsigned k);
 
-  typedef hash_map_cont < exprt, bool, irep_hash > expr_bool_maptt;
+  typedef std::unordered_map < exprt, bool, irep_hash > expr_bool_maptt;
   expr_bool_maptt implication_table;
 
   bool close(node_reft);
@@ -276,16 +276,16 @@ protected:
      size_t operator()(const loc_reft &loc_ref) const { return loc_ref.loc_number; }
   };
   
-  hash_set_cont<loc_reft, hash_loc_refst> cutpoints;
+  std::unordered_set<loc_reft, hash_loc_refst> cutpoints;
   void compute_cutpoints();
   
-	hash_set_cont<std::string> explicit_variables;
+  std::unordered_set<std::string> explicit_variables;
   
   void update_explicit_variables(statet &state, unsigned t);
     
   merge_full_irept merge;
 
-  typedef hash_map_cont<exprt, exprt, irep_hash> modelt;
+  typedef std::unordered_map<exprt, exprt, irep_hash> modelt;
 
   bool  strengthen(
           statet &state,

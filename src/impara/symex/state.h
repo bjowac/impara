@@ -70,7 +70,7 @@ public:
   typedef std::vector<var_statet> var_valt;
   var_valt shared_vars;
  
-  typedef hash_map_cont<irep_idt, var_statet, irep_id_hash> var_state_listt;
+  typedef std::unordered_map<irep_idt, var_statet, irep_id_hash> var_state_listt;
  
   // procedure frame
   struct framet

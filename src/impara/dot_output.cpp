@@ -10,7 +10,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <sstream>
 #include <iostream>
 
-#include <util/i2string.h>
 #include <util/expr_util.h>
 #include <util/simplify_expr.h>
 
@@ -116,7 +115,7 @@ void global_vector2string(const global_vectort& global_vector, std::string& pc_s
       }
       else {
         for(unsigned i=0; i<global_vector[thr].size(); ++i)
-	  pc+=(i>0 ? "::" : "" ) + i2string(global_vector[thr][i].loc_number);
+	  pc+=(i>0 ? "::" : "" ) + std::to_string(global_vector[thr][i].loc_number);
       }
 
       pc_string+= (thr>0 ? ",":"") + pc;
@@ -268,7 +267,7 @@ void nodest::dot_output(std::ostream& out, std::set<unsigned>& visible)
         out << "[weight=10,color="<<thread2color(thread)
             <<", arrowhead="<<arrow_shape 
             <<", penwidth="<< penwidth
-            <<", label=\"T" << i2string(thread)
+            <<", label=\"T" << std::to_string(thread)
             << " "<< line_wrap(instruction_string,40) << "\"];" << std::endl;
                 
 

@@ -56,8 +56,6 @@ bool less_than(const constant_exprt &v1, const constant_exprt &v2)
     return vv1<vv2;
   }
 
-  std::cout << v1 << " " << v2 << std::endl;
-
   assert(false); //types do not match or are not supported
 }
 

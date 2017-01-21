@@ -680,8 +680,7 @@ bool impara_path_searcht::close(node_reft node_ref)
    
     unsigned node_index=node_ref.get_index();
 
-    typedef 
-      hash_map_cont<exprt, bool, irep_full_hash, irep_full_eq>
+    typedef std::unordered_map<exprt, bool, irep_full_hash, irep_full_eq>
       implication_tablet;
 
     implication_tablet table;
@@ -792,8 +791,7 @@ bool impara_path_searcht::ancestor_close(node_reft node_ref,
   
     const exprt &this_label=node.get_label();
    
-    typedef 
-      hash_map_cont<exprt, bool, irep_full_hash, irep_full_eq>
+    typedef std::unordered_map<exprt, bool, irep_full_hash, irep_full_eq>
       implication_tablet;
 
     implication_tablet table;
@@ -819,7 +817,7 @@ bool impara_path_searcht::ancestor_close(node_reft node_ref,
         {
           const exprt &c=*it;
 
-          implication_tablet::iterator iit=table.find(c);
+          auto iit=table.find(c);
           if(iit==table.end())
           {
             implied=implies(this_label, c, ns);

@@ -15,7 +15,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/mp_arith.h>
 #include <util/expr_util.h>
 #include <util/decision_procedure.h>
-#include <util/i2string.h>
 #include <util/find_symbols.h>
 #include <util/replace_expr.h>
 #include <util/base_type.h>
@@ -464,7 +463,7 @@ exprt statet::instantiate_rec(
     
     if(statement==ID_nondet)
     {        
-      irep_idt id="symex::nondet"+i2string(nondet_count);
+      irep_idt id="symex::nondet"+std::to_string(nondet_count);
       ++nondet_count;
       return symbol_exprt(id, src.type());
     }
@@ -533,7 +532,7 @@ exprt statet::instantiate_rec(
     
     if(statement==ID_nondet)
     {        
-      irep_idt id="symex::nondet"+i2string(nondet_count);
+      irep_idt id="symex::nondet"+std::to_string(nondet_count);
       ++nondet_count;
       return symbol_exprt(id, src.type());
     }
@@ -759,7 +758,7 @@ exprt statet::dereference_rec(
         // giving up: create a deref object
         symbolt value_symbol;
 
-        value_symbol.base_name="deref"+i2string(dynamic_count);
+        value_symbol.base_name="deref"+std::to_string(dynamic_count);
         value_symbol.name="symex_dynamic::"+id2string(value_symbol.base_name);
         value_symbol.is_lvalue=true;
         value_symbol.type=var_map.ns.follow(src.type());

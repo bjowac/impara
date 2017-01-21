@@ -12,7 +12,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/arith_tools.h>
 #include <util/simplify_expr.h>
 #include <util/byte_operators.h>
-#include <util/i2string.h>
 #include <util/pointer_offset_size.h>
 #include <util/expr_util.h>
 

@@ -7,7 +7,6 @@ Author: Daniel Kroening, kroening@kroening.com
 \*******************************************************************/
 
 #include <util/decision_procedure.h>
-#include <util/i2string.h>
 #include <util/find_symbols.h>
 #include <util/replace_expr.h>
 #include <solvers/prop/prop_conv.h>
@@ -124,9 +123,9 @@ void impara_step_reft::output(
 
   if(!start.is_true())
   {
-    s= "   {"+i2string(start_nr)
+    s= "   {"+std::to_string(start_nr)
          +"}: N" 
-         + i2string(ancestor->number) + " " 
+         + std::to_string(ancestor->number) + " " 
          + pretty(ns, start) 
          + "\n\n"+s;
   }
@@ -136,8 +135,8 @@ void impara_step_reft::output(
 
   ++step_nr;
 
-  s+= "{"+ i2string(step_nr) + "} " 
-    + "N" + i2string((*this)->node_ref->number) + " " 
+  s+= "{"+ std::to_string(step_nr) + "} " 
+    + "N" + std::to_string((*this)->node_ref->number) + " " 
     + pretty(ns, cond) 
     + " ~> " + from_expr(ns, "", propagation(cond))
     + "\n";
@@ -166,7 +165,7 @@ exprt impara_step_reft::rename(
 
   exprt result(src);
 
-  typedef hash_set_cont<irep_idt, irep_id_hash> symbol_sett;
+  typedef std::unordered_set<irep_idt, irep_id_hash> symbol_sett;
   symbol_sett depends;
 
   find_symbols(src,depends);
@@ -548,10 +547,10 @@ std::string impara_stept::pretty(const namespacet &ns,
 
   std::string step_str;
   step_str+= indent
-          + (step_nr > 0 ? ( "{" + i2string(step_nr) + "}   ") : "")
-          + " N=" + i2string(node_ref->number) + (node_ref->has_label() ? "L" : "U")
-          + " T=" + i2string(thread_nr) 
-          + " PC=" + i2string(pc.loc_number)
+          + (step_nr > 0 ? ( "{" + std::to_string(step_nr) + "}   ") : "")
+          + " N=" + std::to_string(node_ref->number) + (node_ref->has_label() ? "L" : "U")
+          + " T=" + std::to_string(thread_nr) 
+          + " PC=" + std::to_string(pc.loc_number)
           + " " + (is_atomic() ? "ATOMIC" : "")
           + " " + (is_atomic_end() ? "ATOMIC_END" : "");
   current_step += step_str;

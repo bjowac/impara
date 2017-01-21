@@ -10,7 +10,8 @@ Author: Bjorn Wachter, bjoern.wachter@cs.ox.ac.uk
 #define CPROVER_IMPARA_SOLVER_H
 
 #include <util/expr.h>
-#include <util/i2string.h>
+
+#include <string>
 
 //#define SMT2
 
@@ -57,7 +58,7 @@ public:
   {
     literalt activation_literal = convert(
       symbol_exprt("context::\\act$"+
-      i2string(activation_literal_counter++), bool_typet()));
+      std::to_string(activation_literal_counter++), bool_typet()));
 
     set_frozen(activation_literal);
     activation_literals.push_back(activation_literal);

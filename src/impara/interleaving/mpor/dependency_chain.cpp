@@ -11,8 +11,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <vector>
 #include <iostream>
 
-#include <util/i2string.h>
-
 #include <algorithm>
 
 #include "dependency_chain.h"

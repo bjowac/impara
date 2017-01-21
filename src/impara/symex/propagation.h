@@ -51,11 +51,11 @@ public:
     valuet(const exprt &_value);
   };
 
-  typedef hash_map_cont<exprt, valuet, irep_full_hash, irep_full_eq> defst;
+  typedef std::unordered_map<exprt, valuet, irep_full_hash, irep_full_eq> defst;
 
   // remember replacements
   typedef std::pair<exprt, unsigned> cache_entryt;
-  typedef hash_map_cont<exprt, cache_entryt, irep_full_hash, irep_full_eq> cachet;
+  typedef std::unordered_map<exprt, cache_entryt, irep_full_hash, irep_full_eq> cachet;
 
   const namespacet &ns;
   impara_step_reft history;

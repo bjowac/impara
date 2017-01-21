@@ -14,7 +14,6 @@ Author: Daniel Kroening, kroening@kroening.com
 #include <util/mp_arith.h>
 #include <util/expr_util.h>
 #include <util/decision_procedure.h>
-#include <util/i2string.h>
 #include <util/find_symbols.h>
 #include <util/replace_expr.h>
 #include <util/base_type.h>

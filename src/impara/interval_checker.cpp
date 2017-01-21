@@ -11,7 +11,6 @@ Author: Bjorn Wachter, bjoern.wachter@cs.ox.ac.uk
 #include <util/arith_tools.h>
 #include <util/expr_util.h>
 #include <util/decision_procedure.h>
-#include <util/i2string.h>
 #include <util/find_symbols.h>
 
 #include <ansi-c/c_types.h>

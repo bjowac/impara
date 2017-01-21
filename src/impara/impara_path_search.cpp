@@ -16,7 +16,6 @@ Author: Daniel Kroening, kroening@kroening.com
 
 
 #include <util/prefix.h>
-#include <util/i2string.h>
 #include <util/time_stopping.h>
 #include <util/expr_util.h>
 #include <util/simplify_expr.h>

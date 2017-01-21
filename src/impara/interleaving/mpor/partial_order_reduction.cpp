@@ -2,7 +2,6 @@
 #include <set>
 
 
-#include <util/i2string.h>
 #include <util/std_expr.h>
 
 #include <path-symex/locs.h>
@@ -78,7 +77,7 @@ void shared_accesst::rw_sets(
 
 symbol_exprt shared_accesst::thread_symbol(unsigned t)
 {
-  std::string thread_id="thread#"+i2string(t);
+  std::string thread_id="thread#"+std::to_string(t);
   return symbol_exprt(thread_id);
 }
 

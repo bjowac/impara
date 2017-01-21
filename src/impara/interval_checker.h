@@ -41,7 +41,7 @@ class interval_checkert
    interval_domt interval_dom; 
 
  protected:
-   typedef hash_set_cont<irep_idt, irep_id_hash> symbol_sett;
+   typedef std::unordered_set<irep_idt, irep_id_hash> symbol_sett;
  
    symbol_sett depends;
    impara_step_reft history;

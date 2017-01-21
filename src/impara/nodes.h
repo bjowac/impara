@@ -83,7 +83,7 @@ class nodest
 public:  
   // Access nodes per LOC^THREADS.
   // The addresses of the lists also need to be stable.
-  typedef hash_map_cont<global_vectort, 
+  typedef std::unordered_map<global_vectort, 
                         node_equiv_classt, 
                         global_vector_hasht,
                         global_vector_equalityt> node_mapt;

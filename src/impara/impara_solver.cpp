@@ -7,7 +7,6 @@ Author: Bjoern Wachter, bjoern.wachter@gmail.com
 
 \*******************************************************************/
 
-#include <util/i2string.h>
 #include <cstdlib>
 #include <algorithm>
 
@@ -68,7 +67,7 @@ literalt impara_solver_smt2t::new_context()
 {
   literalt activation_literal = convert(
       symbol_exprt("context::\\act$"+
-      i2string(activation_literal_counter++), bool_typet()));
+      std::to_string(activation_literal_counter++), bool_typet()));
 
   set_frozen(activation_literal);
   activation_literals.push_back(activation_literal);

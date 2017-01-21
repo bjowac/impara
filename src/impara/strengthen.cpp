@@ -16,7 +16,6 @@ Author: Bjoern Wachter, bjoern.wachter@gmail.com
 #include <util/simplify_expr.h>
 #include <util/replace_expr.h>
 #include <util/arith_tools.h>
-#include <util/i2string.h>
 
 #include "symex/from_ssa.h"
 
@@ -205,7 +204,7 @@ struct row_templatet
   exprt get_row_symb_value(size_t row)
   {
     assert(row<templ.size());
-    return symbol_exprt("symb::bound"+i2string(row), templ[row].type());
+    return symbol_exprt("symb::bound"+std::to_string(row), templ[row].type());
   }
   
      
@@ -720,7 +719,7 @@ class poly_templatet
         
         
         
-        std::string coeff_name="polynomial::coeff@"+i2string(degree)+"#"+i2string(coeff_nr++);
+        std::string coeff_name="polynomial::coeff@"+std::to_string(degree)+"#"+std::to_string(coeff_nr++);
       
         symbol_exprt coeff= 
           fresh_coeff(0,width);
@@ -757,7 +756,7 @@ class poly_templatet
           sum1=plus_exprt(sum1, product);
       }
       
-      std::string coeff_name="polynomial::coeff@"+i2string(degree)+"#"+i2string(coeff_nr++);
+      std::string coeff_name="polynomial::coeff@"+std::to_string(degree)+"#"+std::to_string(coeff_nr++);
       
       sum1=plus_exprt(sum1, fresh_coeff(1, width));
       
@@ -780,7 +779,7 @@ class poly_templatet
     unsigned degree,
     unsigned width)
   {
-    std::string coeff_name="polynomial::coeff@"+i2string(degree)+"#"+i2string(coeff_nr++);
+    std::string coeff_name="polynomial::coeff@"+std::to_string(degree)+"#"+std::to_string(coeff_nr++);
   
     return symbol_exprt(coeff_name,
       signedbv_typet(width));
